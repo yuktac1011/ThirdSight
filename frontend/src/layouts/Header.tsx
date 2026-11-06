@@ -1,12 +1,26 @@
 import React from 'react';
-import { Menu, Bell, Search } from 'lucide-react';
+import { Menu, Bell, Search, LogOut } from 'lucide-react';
 import { Breadcrumb } from '@/components/common/Breadcrumb';
+import { useAuth } from '@/hooks/useAuth';
 
 interface HeaderProps {
   onOpenMobileMenu: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({ onOpenMobileMenu }) => {
+  const { user, logout } = useAuth();
+
+  const userInitials = user?.full_name
+    ? user.full_name
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .slice(0, 2)
+        .toUpperCase()
+    : 'SO';
+
+  const userRole = user?.roles[0]?.name ? user.roles[0].name.toUpperCase() : 'ANALYST';
+
   return (
     <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-slate-200/80 bg-white/95 px-4 backdrop-blur sm:px-6">
       {/* Left side: mobile toggle + breadcrumbs */}
@@ -55,17 +69,33 @@ export const Header: React.FC<HeaderProps> = ({ onOpenMobileMenu }) => {
 
         <div className="h-5 w-px bg-slate-200 mx-1 hidden sm:block" />
 
-        {/* User profile placeholder */}
+        {/* User profile with tenant and logout */}
         <div className="flex items-center gap-2.5 pl-1">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-xs font-semibold text-white shadow-sm ring-1 ring-slate-200">
-            SO
+            {userInitials}
           </div>
           <div className="hidden text-left lg:block">
-            <div className="text-xs font-semibold text-slate-900 leading-tight">SecOps Analyst</div>
-            <div className="text-[10px] text-slate-500 leading-tight">SecOps & Risk Team</div>
+            <div className="text-xs font-semibold text-slate-900 leading-tight">
+              {user?.full_name || user?.email || 'SecOps User'}
+            </div>
+            <div className="text-[10px] text-slate-500 leading-tight flex items-center gap-1">
+              <span>{user?.organization_name || 'Organization'}</span>
+              <span>•</span>
+              <span className="font-semibold text-brand-600">{userRole}</span>
+            </div>
           </div>
+
+          <button
+            onClick={logout}
+            title="Sign out of ThirdSight"
+            aria-label="Sign out"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors ml-1"
+          >
+            <LogOut className="h-4 w-4" />
+          </button>
         </div>
       </div>
     </header>
   );
 };
+

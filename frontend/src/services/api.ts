@@ -1,6 +1,8 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { env } from '@/lib/env';
 
+export const TOKEN_STORAGE_KEY = 'thirdsight_access_token';
+
 export const apiClient: AxiosInstance = axios.create({
   baseURL: env.VITE_API_BASE_URL,
   timeout: 15000,
@@ -11,9 +13,10 @@ export const apiClient: AxiosInstance = axios.create({
 
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Future auth token assignment can be attached here cleanly:
-    // const token = getAuthToken();
-    // if (token && config.headers) config.headers.Authorization = `Bearer ${token}`;
+    const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   },
   (error: AxiosError) => {
@@ -24,11 +27,13 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
-    // Centralized error handling structure
     if (error.response?.status === 401) {
-      // Future redirect or notification hook
+      // Clear token upon 401 Unauthorized or expired token
+      localStorage.removeItem(TOKEN_STORAGE_KEY);
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login?expired=true';
+      }
     }
     return Promise.reject(error);
   }
 );
-

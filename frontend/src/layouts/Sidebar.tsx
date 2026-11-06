@@ -15,6 +15,7 @@ import {
   Layers
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/useAuth';
 
 export interface NavItem {
   name: string;
@@ -48,6 +49,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isMobileOpen,
   onCloseMobile,
 }) => {
+  const { user } = useAuth();
+
   return (
     <>
       {/* Mobile backdrop */}
@@ -77,8 +80,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <span className="font-semibold text-slate-900 tracking-tight text-sm">
                   Third<span className="text-brand-600">Sight</span>
                 </span>
-                <span className="text-[10px] uppercase font-bold tracking-wider text-slate-600">
-                  SecOps Intelligence
+                <span className="text-[10px] uppercase font-bold tracking-wider text-slate-600 truncate">
+                  {user?.organization_name || 'SecOps Intelligence'}
                 </span>
               </div>
             )}
@@ -139,9 +142,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div className="flex items-center justify-between text-[11px] text-slate-600 px-1">
               <span className="flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                Network Secure
+                Tenant Isolated
               </span>
-              <span className="font-mono text-slate-600">v0.1.0</span>
+              <span className="font-mono text-slate-600">{user?.organization_slug || 'v0.2.0'}</span>
             </div>
           ) : (
             <div className="flex justify-center" title="Platform Online">
@@ -153,3 +156,4 @@ export const Sidebar: React.FC<SidebarProps> = ({
     </>
   );
 };
+
