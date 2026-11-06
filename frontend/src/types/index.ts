@@ -1,6 +1,14 @@
 export type SeverityLevel = 'critical' | 'high' | 'medium' | 'low' | 'info';
 
-export type AssessmentStatus = 'completed' | 'in_progress' | 'pending' | 'flagged';
+export type AssessmentStatus =
+  | 'initiated'
+  | 'assigned'
+  | 'in_progress'
+  | 'submitted'
+  | 'under_review'
+  | 'approved'
+  | 'rejected'
+  | 'reopened';
 
 export interface UserRole {
   id: string;
@@ -138,8 +146,6 @@ export type SecurityDomainType =
   | 'Third-Party & Supply Chain'
   | 'Physical & Environmental';
 
-export type AssignmentStatusType = 'pending' | 'in_progress' | 'completed' | 'flagged';
-
 export interface QuestionEntity {
   id: string;
   template_id: string;
@@ -186,7 +192,8 @@ export interface QuestionnaireTemplateCreatePayload {
 
 export interface QuestionAnswerEntity {
   id: string;
-  assignment_id: string;
+  assignment_id?: string | null;
+  assessment_id?: string | null;
   question_id: string;
   response_value: string;
   justification?: string | null;
@@ -201,7 +208,7 @@ export interface QuestionnaireAssignmentEntity {
   vendor_id: string;
   template_id: string;
   template_version: number;
-  status: AssignmentStatusType;
+  status: string;
   due_date?: string | null;
   assigned_to_email?: string | null;
   notes?: string | null;
@@ -228,7 +235,53 @@ export interface AnswerSubmissionPayload {
   evidence_reference?: string;
 }
 
-// Scaffolding types for remaining increments
+export interface AssessmentHistoryItem {
+  id: string;
+  from_status?: string | null;
+  to_status: string;
+  actor_email: string;
+  comment?: string | null;
+  created_at: string;
+}
+
+export interface AssessmentEntity {
+  id: string;
+  organization_id: string;
+  vendor_id: string;
+  template_id: string;
+  version: number;
+  status: AssessmentStatus;
+  scope: string;
+  due_at?: string | null;
+  assigned_respondent_email?: string | null;
+  analyst_reviewer_id?: string | null;
+  review_notes?: string | null;
+  reviewed_at?: string | null;
+  score?: number | null;
+  is_locked: boolean;
+  created_at: string;
+  updated_at: string;
+  vendor_name?: string;
+  template_title?: string;
+  completion_percentage: number;
+  answers: QuestionAnswerEntity[];
+  history: AssessmentHistoryItem[];
+}
+
+export interface AssessmentCreatePayload {
+  vendor_id: string;
+  template_id: string;
+  scope: string;
+  due_at?: string;
+  assigned_respondent_email?: string;
+}
+
+export interface AssessmentReviewPayload {
+  action: 'approve' | 'reject' | 'reopen';
+  review_notes?: string;
+}
+
+// Scaffolding types for overview feeds
 export interface VendorOverview {
   id: string;
   name: string;
@@ -244,7 +297,7 @@ export interface AssessmentOverview {
   vendorName: string;
   framework: string;
   score: number;
-  status: AssessmentStatus;
+  status: string;
   date: string;
 }
 

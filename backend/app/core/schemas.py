@@ -240,7 +240,8 @@ class AnswerResponse(AnswerSubmission):
     model_config = ConfigDict(from_attributes=True)
 
     id: str
-    assignment_id: str
+    assignment_id: Optional[str] = None
+    assessment_id: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 
@@ -263,3 +264,55 @@ class QuestionnaireAssignmentResponse(BaseModel):
     vendor_name: Optional[str] = None
     template_title: Optional[str] = None
     answers: List[AnswerResponse] = []
+
+
+# ================= ASSESSMENT LIFECYCLE SCHEMAS =================
+
+class AssessmentCreate(BaseModel):
+    vendor_id: str
+    template_id: str
+    scope: str = Field("Annual Vendor Risk Audit", min_length=3, max_length=255)
+    due_at: Optional[datetime] = None
+    assigned_respondent_email: Optional[EmailStr] = None
+
+
+class AssessmentReviewAction(BaseModel):
+    action: str = Field(..., description="approve, reject, reopen")
+    review_notes: Optional[str] = None
+
+
+class AssessmentHistoryResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    from_status: Optional[str] = None
+    to_status: str
+    actor_email: str
+    comment: Optional[str] = None
+    created_at: datetime
+
+
+class AssessmentResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    organization_id: str
+    vendor_id: str
+    template_id: str
+    version: int
+    status: str
+    scope: str
+    due_at: Optional[datetime] = None
+    assigned_respondent_email: Optional[str] = None
+    analyst_reviewer_id: Optional[str] = None
+    review_notes: Optional[str] = None
+    reviewed_at: Optional[datetime] = None
+    score: Optional[float] = None
+    is_locked: bool
+    created_at: datetime
+    updated_at: datetime
+    vendor_name: Optional[str] = None
+    template_title: Optional[str] = None
+    completion_percentage: int = 0
+    answers: List[AnswerResponse] = []
+    history: List[AssessmentHistoryResponse] = []

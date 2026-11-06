@@ -9,6 +9,7 @@ from app.features.organizations.router import router as organizations_router
 from app.features.users.router import router as users_router
 from app.features.vendors.router import router as vendors_router
 from app.features.questionnaires.router import router as questionnaires_router
+from app.features.assessments.router import router as assessments_router
 
 
 @asynccontextmanager
@@ -45,6 +46,7 @@ app.include_router(organizations_router, prefix=settings.API_V1_STR)
 app.include_router(users_router, prefix=settings.API_V1_STR)
 app.include_router(vendors_router, prefix=settings.API_V1_STR)
 app.include_router(questionnaires_router, prefix=settings.API_V1_STR)
+app.include_router(assessments_router, prefix=settings.API_V1_STR)
 
 
 @app.get("/health", tags=["Health"])

@@ -19,6 +19,9 @@ from app.core.models import (
     TemplateStatus,
     QuestionnaireAssignment,
     AssignmentStatus,
+    Assessment,
+    AssessmentHistory,
+    AssessmentStatus as AsmStatus,
 )
 from app.core.init_db import seed_roles_and_permissions
 
@@ -128,8 +131,8 @@ def seed_dev_data():
             db.add_all([v2, v2_contact])
 
         # Seed standard security questionnaire templates if none exist
-        existing_t_count = db.query(QuestionnaireTemplate).filter(QuestionnaireTemplate.organization_id == org.id).count()
-        if existing_t_count == 0:
+        t1 = db.query(QuestionnaireTemplate).filter(QuestionnaireTemplate.organization_id == org.id).first()
+        if not t1:
             t1 = QuestionnaireTemplate(
                 id=str(uuid.uuid4()),
                 organization_id=org.id,
@@ -192,23 +195,43 @@ def seed_dev_data():
             )
             db.add_all([q1, q2, q3, q4])
 
-            # Seed an active assignment for PayBridge Gateways
-            if v2:
-                assign = QuestionnaireAssignment(
-                    id=str(uuid.uuid4()),
-                    organization_id=org.id,
-                    vendor_id=v2.id,
-                    template_id=t1.id,
-                    template_version=1,
-                    status=AssignmentStatus.IN_PROGRESS,
-                    assigned_to_email="compliance@paybridge-api.com",
-                    notes="Annual SIG Lite audit required for Tier-1 checkout gateway.",
-                    completion_percentage=25,
-                )
-                db.add(assign)
+        # Seed initial Assessment for PayBridge Gateways
+        asm_count = db.query(Assessment).filter(Assessment.organization_id == org.id).count()
+        if asm_count == 0 and v2 and t1:
+            asm1 = Assessment(
+                id=str(uuid.uuid4()),
+                organization_id=org.id,
+                vendor_id=v2.id,
+                template_id=t1.id,
+                version=1,
+                status=AsmStatus.IN_PROGRESS,
+                scope="Annual Tier-1 Payment Tokenization Audit",
+                assigned_respondent_email="compliance@paybridge-api.com",
+                is_locked=False,
+            )
+            db.add(asm1)
+            db.flush()
+
+            h1 = AssessmentHistory(
+                id=str(uuid.uuid4()),
+                assessment_id=asm1.id,
+                from_status=None,
+                to_status=AsmStatus.ASSIGNED.value,
+                actor_email="admin@cyberguard.internal",
+                comment="Assessment assigned to PayBridge compliance team",
+            )
+            h2 = AssessmentHistory(
+                id=str(uuid.uuid4()),
+                assessment_id=asm1.id,
+                from_status=AsmStatus.ASSIGNED.value,
+                to_status=AsmStatus.IN_PROGRESS.value,
+                actor_email="compliance@paybridge-api.com",
+                comment="Vendor respondent saved draft controls",
+            )
+            db.add_all([h1, h2])
 
         db.commit()
-        print("Successfully seeded CyberGuard Corp templates, questions, and assignments.")
+        print("Successfully seeded CyberGuard Corp templates, questions, and assessments.")
     finally:
         db.close()
 

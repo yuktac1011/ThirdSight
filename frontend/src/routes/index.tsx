@@ -10,10 +10,11 @@ import { VendorListPage } from '@/features/vendors/VendorListPage';
 import { VendorDetailPage } from '@/features/vendors/VendorDetailPage';
 import { QuestionnaireDashboardPage } from '@/features/questionnaires/QuestionnaireDashboardPage';
 import { TemplateDetailPage } from '@/features/questionnaires/TemplateDetailPage';
-import { AssessmentResponsePage } from '@/features/questionnaires/AssessmentResponsePage';
+import { AssessmentDashboardPage } from '@/features/assessments/AssessmentDashboardPage';
+import { AssessmentDetailPage } from '@/features/assessments/AssessmentDetailPage';
+import { VendorResponsePortalPage } from '@/features/assessments/VendorResponsePortalPage';
 import { ProtectedRoute } from '@/routes/ProtectedRoute';
 import {
-  ClipboardCheck,
   FileCheck,
   Layers,
   ShieldAlert,
@@ -33,26 +34,20 @@ export const AppRoutes: React.FC = () => {
           {/* Dashboard Landing Route */}
           <Route index element={<OverviewPage />} />
 
-          {/* Vendors Management (Increment 03 Real Implementation) */}
+          {/* Vendors Management (Increment 03) */}
           <Route path="vendors" element={<VendorListPage />} />
           <Route path="vendors/:vendorId" element={<VendorDetailPage />} />
 
-          {/* Questionnaires Engine (Increment 04 Real Implementation) */}
+          {/* Security Questionnaire Engine (Increment 04) */}
           <Route path="questionnaires" element={<QuestionnaireDashboardPage />} />
           <Route path="questionnaires/templates/:templateId" element={<TemplateDetailPage />} />
-          <Route path="questionnaires/assignments/:assignmentId" element={<AssessmentResponsePage />} />
+
+          {/* Assessment Management & Vendor Response Portal (Increments 05 & 06) */}
+          <Route path="assessments" element={<AssessmentDashboardPage />} />
+          <Route path="assessments/:assessmentId" element={<AssessmentDetailPage />} />
+          <Route path="assessments/:assessmentId/respond" element={<VendorResponsePortalPage />} />
 
           {/* Feature Navigation Modules (Upcoming Increments) */}
-          <Route
-            path="assessments"
-            element={
-              <PlaceholderView
-                moduleName="Assessments"
-                description="Coordinate security assessments, audits, and compliance evaluation cycles."
-                icon={<ClipboardCheck className="h-6 w-6 text-brand-600" />}
-              />
-            }
-          />
           <Route
             path="evidence"
             element={

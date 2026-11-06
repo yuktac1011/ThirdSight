@@ -95,6 +95,19 @@ class SecurityDomain(str, enum.Enum):
     PHYSICAL_ENVIRONMENTAL = "Physical & Environmental"
 
 
+# --- Assessment Lifecycle Enums ---
+
+class AssessmentStatus(str, enum.Enum):
+    INITIATED = "initiated"
+    ASSIGNED = "assigned"
+    IN_PROGRESS = "in_progress"
+    SUBMITTED = "submitted"
+    UNDER_REVIEW = "under_review"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    REOPENED = "reopened"
+
+
 class AssignmentStatus(str, enum.Enum):
     PENDING = "pending"
     IN_PROGRESS = "in_progress"
@@ -132,6 +145,7 @@ class Organization(Base):
     vendors = relationship("Vendor", back_populates="organization", cascade="all, delete-orphan")
     questionnaire_templates = relationship("QuestionnaireTemplate", back_populates="organization", cascade="all, delete-orphan")
     questionnaire_assignments = relationship("QuestionnaireAssignment", back_populates="organization", cascade="all, delete-orphan")
+    assessments = relationship("Assessment", back_populates="organization", cascade="all, delete-orphan")
 
 
 class Permission(Base):
@@ -208,6 +222,7 @@ class Vendor(Base):
     organization = relationship("Organization", back_populates="vendors")
     contacts = relationship("VendorContact", back_populates="vendor", cascade="all, delete-orphan")
     assignments = relationship("QuestionnaireAssignment", back_populates="vendor", cascade="all, delete-orphan")
+    assessments = relationship("Assessment", back_populates="vendor", cascade="all, delete-orphan")
 
 
 class VendorContact(Base):
@@ -236,7 +251,7 @@ class QuestionnaireTemplate(Base):
     description = Column(Text, nullable=True)
     version = Column(Integer, nullable=False, default=1)
     status = Column(SQLEnum(TemplateStatus), nullable=False, default=TemplateStatus.DRAFT)
-    framework_tag = Column(String(100), nullable=False, default="Custom SecOps") # e.g. SOC 2, ISO 27001, SIG Lite
+    framework_tag = Column(String(100), nullable=False, default="Custom SecOps")
     
     created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
     updated_at = Column(DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False)
@@ -244,6 +259,7 @@ class QuestionnaireTemplate(Base):
     organization = relationship("Organization", back_populates="questionnaire_templates")
     questions = relationship("Question", back_populates="template", cascade="all, delete-orphan", order_by="Question.order_index")
     assignments = relationship("QuestionnaireAssignment", back_populates="template", cascade="all, delete-orphan")
+    assessments = relationship("Assessment", back_populates="template", cascade="all, delete-orphan")
 
 
 class Question(Base):
@@ -256,7 +272,7 @@ class Question(Base):
     text = Column(Text, nullable=False)
     guidance = Column(Text, nullable=True)
     question_type = Column(SQLEnum(QuestionType), nullable=False, default=QuestionType.CHOICE_PARTIAL)
-    weight = Column(Float, nullable=False, default=1.0) # Weight multiplier for scoring
+    weight = Column(Float, nullable=False, default=1.0)
     is_mandatory = Column(Boolean, default=True, nullable=False)
     requires_evidence = Column(Boolean, default=False, nullable=False)
 
@@ -294,16 +310,66 @@ class QuestionAnswer(Base):
     __tablename__ = "question_answers"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    assignment_id = Column(String(36), ForeignKey("questionnaire_assignments.id", ondelete="CASCADE"), nullable=False, index=True)
+    assignment_id = Column(String(36), ForeignKey("questionnaire_assignments.id", ondelete="CASCADE"), nullable=True, index=True)
+    assessment_id = Column(String(36), ForeignKey("assessments.id", ondelete="CASCADE"), nullable=True, index=True)
     question_id = Column(String(36), ForeignKey("questions.id", ondelete="CASCADE"), nullable=False, index=True)
     
-    # Value can be 'yes', 'no', 'partial', 'na', or string for text questions
     response_value = Column(String(100), nullable=False)
-    justification = Column(Text, nullable=True) # Required if response is 'na' or 'partial'
-    evidence_reference = Column(String(255), nullable=True) # Pointer or key to uploaded artifact
+    justification = Column(Text, nullable=True)
+    evidence_reference = Column(String(255), nullable=True)
     
     created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
     updated_at = Column(DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False)
 
     assignment = relationship("QuestionnaireAssignment", back_populates="answers")
+    assessment = relationship("Assessment", back_populates="answers")
     question = relationship("Question", back_populates="answers")
+
+
+# ================= ASSESSMENT LIFECYCLE MODELS =================
+
+class Assessment(Base):
+    __tablename__ = "assessments"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    organization_id = Column(String(36), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    vendor_id = Column(String(36), ForeignKey("vendors.id", ondelete="CASCADE"), nullable=False, index=True)
+    template_id = Column(String(36), ForeignKey("questionnaire_templates.id", ondelete="CASCADE"), nullable=False, index=True)
+    
+    version = Column(Integer, nullable=False, default=1)
+    status = Column(SQLEnum(AssessmentStatus), nullable=False, default=AssessmentStatus.INITIATED)
+    scope = Column(String(255), nullable=False, default="Annual Vendor Risk Audit")
+    due_at = Column(DateTime(timezone=True), nullable=True)
+    assigned_respondent_email = Column(String(255), nullable=True)
+    
+    # Audit review fields
+    analyst_reviewer_id = Column(String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    review_notes = Column(Text, nullable=True)
+    reviewed_at = Column(DateTime(timezone=True), nullable=True)
+    
+    score = Column(Float, nullable=True) # Normalized computed score out of 100
+    is_locked = Column(Boolean, default=False, nullable=False) # Locked on submit or approval
+    
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False)
+
+    organization = relationship("Organization", back_populates="assessments")
+    vendor = relationship("Vendor", back_populates="assessments")
+    template = relationship("QuestionnaireTemplate", back_populates="assessments")
+    reviewer = relationship("User", foreign_keys=[analyst_reviewer_id])
+    answers = relationship("QuestionAnswer", back_populates="assessment", cascade="all, delete-orphan")
+    history = relationship("AssessmentHistory", back_populates="assessment", cascade="all, delete-orphan", order_by="AssessmentHistory.created_at.desc()")
+
+
+class AssessmentHistory(Base):
+    __tablename__ = "assessment_history"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    assessment_id = Column(String(36), ForeignKey("assessments.id", ondelete="CASCADE"), nullable=False, index=True)
+    from_status = Column(String(50), nullable=True)
+    to_status = Column(String(50), nullable=False)
+    actor_email = Column(String(255), nullable=False)
+    comment = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+    assessment = relationship("Assessment", back_populates="history")
