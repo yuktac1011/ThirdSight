@@ -51,6 +51,78 @@ export interface UserInvitation {
   created_at: string;
 }
 
+// ================= VENDOR TYPES =================
+
+export type VendorCriticalityType = 'tier_1' | 'tier_2' | 'tier_3';
+
+export type VendorStatusType = 'active' | 'under_review' | 'monitored' | 'decommissioned';
+
+export type DataClassificationType = 'public' | 'internal' | 'confidential' | 'restricted';
+
+export type AccessLevelType = 'none' | 'network' | 'application' | 'database' | 'administrative';
+
+export interface VendorContact {
+  id: string;
+  vendor_id: string;
+  name: string;
+  email: string;
+  phone?: string | null;
+  title?: string | null;
+  is_primary: boolean;
+  created_at: string;
+}
+
+export interface VendorEntity {
+  id: string;
+  organization_id: string;
+  name: string;
+  website?: string | null;
+  industry: string;
+  service_category: string;
+  service_description?: string | null;
+  criticality: VendorCriticalityType;
+  status: VendorStatusType;
+  data_classification: DataClassificationType;
+  access_level: AccessLevelType;
+  risk_score: number;
+  created_at: string;
+  updated_at: string;
+  contacts: VendorContact[];
+}
+
+export interface VendorCreatePayload {
+  name: string;
+  website?: string;
+  industry: string;
+  service_category: string;
+  service_description?: string;
+  criticality: VendorCriticalityType;
+  status: VendorStatusType;
+  data_classification: DataClassificationType;
+  access_level: AccessLevelType;
+  contacts?: {
+    name: string;
+    email: string;
+    phone?: string;
+    title?: string;
+    is_primary?: boolean;
+  }[];
+}
+
+export interface VendorUpdatePayload {
+  name?: string;
+  website?: string;
+  industry?: string;
+  service_category?: string;
+  service_description?: string;
+  criticality?: VendorCriticalityType;
+  status?: VendorStatusType;
+  data_classification?: DataClassificationType;
+  access_level?: AccessLevelType;
+  risk_score?: number;
+}
+
+// Scaffolding types for other modules
 export interface VendorOverview {
   id: string;
   name: string;

@@ -6,9 +6,10 @@ import { PlaceholderView } from '@/components/common/PlaceholderView';
 import { LoginPage } from '@/features/auth/LoginPage';
 import { UnauthorizedPage } from '@/features/auth/UnauthorizedPage';
 import { SettingsPage } from '@/features/settings/SettingsPage';
+import { VendorListPage } from '@/features/vendors/VendorListPage';
+import { VendorDetailPage } from '@/features/vendors/VendorDetailPage';
 import { ProtectedRoute } from '@/routes/ProtectedRoute';
 import {
-  Building2,
   ClipboardCheck,
   FileQuestion,
   FileCheck,
@@ -30,17 +31,11 @@ export const AppRoutes: React.FC = () => {
           {/* Dashboard Landing Route */}
           <Route index element={<OverviewPage />} />
 
-          {/* Feature Navigation Modules */}
-          <Route
-            path="vendors"
-            element={
-              <PlaceholderView
-                moduleName="Vendors"
-                description="Manage third-party entities, tiers, contact persons, and domain mappings."
-                icon={<Building2 className="h-6 w-6 text-brand-600" />}
-              />
-            }
-          />
+          {/* Vendors Management (Increment 03 Real Implementation) */}
+          <Route path="vendors" element={<VendorListPage />} />
+          <Route path="vendors/:vendorId" element={<VendorDetailPage />} />
+
+          {/* Feature Navigation Modules (Upcoming Increments) */}
           <Route
             path="assessments"
             element={
