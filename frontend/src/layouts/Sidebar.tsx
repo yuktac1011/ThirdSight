@@ -8,6 +8,7 @@ import {
   FileCheck,
   ShieldAlert,
   FileText,
+  Bell,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -33,6 +34,7 @@ export const navigationItems: NavItem[] = [
   { name: 'Security Controls', href: '/security-controls', icon: Layers },
   { name: 'Risk Analysis', href: '/risk-analysis', icon: ShieldAlert },
   { name: 'Reports', href: '/reports', icon: FileText },
+  { name: 'Monitoring', href: '/monitoring', icon: Bell },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 

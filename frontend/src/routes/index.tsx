@@ -2,7 +2,6 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { MainLayout } from '@/layouts/MainLayout';
 import { OverviewPage } from '@/features/overview/OverviewPage';
-import { PlaceholderView } from '@/components/common/PlaceholderView';
 import { LoginPage } from '@/features/auth/LoginPage';
 import { UnauthorizedPage } from '@/features/auth/UnauthorizedPage';
 import { SettingsPage } from '@/features/settings/SettingsPage';
@@ -16,10 +15,9 @@ import { VendorResponsePortalPage } from '@/features/assessments/VendorResponseP
 import { EvidencePage } from '@/features/evidence/EvidencePage';
 import { ControlsPage } from '@/features/controls/ControlsPage';
 import { RiskDashboardPage } from '@/features/risk/RiskDashboardPage';
+import { ReportsPage } from '@/features/reports/ReportsPage';
+import { ContinuousMonitoringPage } from '@/features/monitoring/ContinuousMonitoringPage';
 import { ProtectedRoute } from '@/routes/ProtectedRoute';
-import {
-  FileText,
-} from 'lucide-react';
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -55,16 +53,11 @@ export const AppRoutes: React.FC = () => {
 
           {/* Risk Engine, Gap Analysis & Remediation (Increment 09) */}
           <Route path="risk-analysis" element={<RiskDashboardPage />} />
-          <Route
-            path="reports"
-            element={
-              <PlaceholderView
-                moduleName="Reports"
-                description="Generate executive briefings, compliance audits, and regulatory risk disclosures."
-                icon={<FileText className="h-6 w-6 text-brand-600" />}
-              />
-            }
-          />
+          {/* Reports & PDF Dossiers (Increment 11) */}
+          <Route path="reports" element={<ReportsPage />} />
+
+          {/* Continuous Monitoring & Audit Log (Increment 11) */}
+          <Route path="monitoring" element={<ContinuousMonitoringPage />} />
 
           {/* Settings & Organization Administration */}
           <Route path="settings" element={<SettingsPage />} />

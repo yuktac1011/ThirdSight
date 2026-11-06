@@ -1,0 +1,73 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 1091 >>
+stream
+BT
+/F1 20 Tf
+50 750 Td
+(Vendor Dossier be0d68 - Executive Risk Dossier) Tj
+/F1 10 Tf
+0 -24 Td
+(Generated: 2026-11-06 11:02:48 UTC | Auditor: reporter-dc768f@test.org) Tj
+0 -16 Td
+(Classification: CONFIDENTIAL & PROPRIETARY | Standard: ISO/IEC 27001 & NIST CSF 2.0) Tj
+ET
+50 695 m 550 695 l S
+BT
+/F1 14 Tf
+50 670 Td
+(1. Vendor Security Intelligence & Scope) Tj
+/F1 10 Tf
+0 -20 Td
+(Vendor Name: Vendor Dossier be0d68) Tj
+0 -16 Td
+(Audit Scope: SOC 2 Type II Annual Audit) Tj
+0 -16 Td
+(Assessment Lifecycle Status: APPROVED) Tj
+/F1 14 Tf
+0 -30 Td
+(2. Deterministic Risk Profile & Heatmap Bands) Tj
+/F1 10 Tf
+0 -20 Td
+(Inherent Risk Exposure: 15 / 25  (Likelihood x Impact)) Tj
+0 -16 Td
+(Residual Post-Mitigation Risk: 10 / 25  [MEDIUM BAND]) Tj
+0 -16 Td
+(Questionnaire Posture Score: 92.5 / 100.0) Tj
+/F1 14 Tf
+0 -30 Td
+(3. Security Gap Findings & Remediation Items: 0 Total) Tj
+/F1 9 Tf
+0 -20 Td
+(No active critical or high findings recorded. All controls substantiated.) Tj
+/F1 8 Tf
+0 -40 Td
+(ThirdSight Enterprise TPRM Platform - Cryptographically verified and tamper-evident snapshot) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000001384 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+1454
+%%EOF

@@ -1,0 +1,168 @@
+services:
+  # Edge Reverse Proxy
+  gateway:
+    image: nginx:alpine
+    container_name: thirdsight_gateway
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/certs:/etc/nginx/certs:ro
+    depends_on:
+      api:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+    networks:
+      - frontend_net
+      - edge_net
+
+  # React Frontend (Unprivileged)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: thirdsight_frontend
+    restart: always
+    expose:
+      - "8080"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - frontend_net
+
+  # FastAPI Backend Service
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: thirdsight_api
+    restart: always
+    environment:
+      - PROJECT_NAME=ThirdSight
+      - DATABASE_URL=postgresql://thirdsight:secure_prod_password@db:5432/thirdsight_prod
+      - SECRET_KEY=replace_with_prod_secret_min32_characters_random
+      - ACCESS_TOKEN_EXPIRE_MINUTES=60
+      - STORAGE_BACKEND=s3
+      - S3_ENDPOINT_URL=http://minio:9000
+      - S3_BUCKET_NAME=thirdsight-evidence
+      - S3_ACCESS_KEY=minioadmin
+      - S3_SECRET_KEY=minioadmin_secure_secret
+      - REDIS_URL=redis://redis:6379/0
+    expose:
+      - "8000"
+    volumes:
+      - evidence_data:/app/data/evidence
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - frontend_net
+      - backend_net
+
+  # Asynchronous Document & PDF Worker
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: thirdsight_worker
+    restart: always
+    command: ["celery", "-A", "app.core.celery", "worker", "--loglevel=info", "-c", "4"]
+    environment:
+      - DATABASE_URL=postgresql://thirdsight:secure_prod_password@db:5432/thirdsight_prod
+      - REDIS_URL=redis://redis:6379/0
+      - STORAGE_BACKEND=s3
+      - S3_ENDPOINT_URL=http://minio:9000
+    volumes:
+      - evidence_data:/app/data/evidence
+    depends_on:
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    networks:
+      - backend_net
+
+  # PostgreSQL Transactional Database
+  db:
+    image: postgres:16-alpine
+    container_name: thirdsight_db
+    restart: always
+    environment:
+      - POSTGRES_USER=thirdsight
+      - POSTGRES_PASSWORD=secure_prod_password
+      - POSTGRES_DB=thirdsight_prod
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U thirdsight -d thirdsight_prod"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend_net
+
+  # Redis Broker
+  redis:
+    image: redis:7-alpine
+    container_name: thirdsight_redis
+    restart: always
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "secure_redis_auth"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "secure_redis_auth", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - backend_net
+
+  # Private MinIO S3 Object Store
+  minio:
+    image: minio/minio:RELEASE.2024-05-10T01-41-38Z
+    container_name: thirdsight_minio
+    restart: always
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin_secure_secret
+    volumes:
+      - miniodata:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - backend_net
+
+networks:
+  edge_net:
+    driver: bridge
+  frontend_net:
+    driver: bridge
+  backend_net:
+    internal: true # Isolated internal network with zero direct external ingress
+
+volumes:
+  pgdata:
+  redisdata:
+  miniodata:
+  evidence_data:
+

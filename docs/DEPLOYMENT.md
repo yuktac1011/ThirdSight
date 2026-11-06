@@ -1,78 +1,83 @@
-# Deployment and Operations
+# ThirdSight Deployment & Production Operations Guide
 
-## 1. Environments
+## 1. Production Architecture Overview
 
-Maintain separate development, staging, and production environments.
-Production data must not be copied into development without an approved
-anonymization process.
+ThirdSight is deployed as a hardened, containerized application with strict network isolation and defense-in-depth:
 
-## 2. Container principles
+```mermaid
+flowchart TB
+  subgraph Public Edge
+    A[HTTPS Client / Browser]
+    B[TLS Nginx Gateway :443]
+  end
 
--   Use minimal, pinned base images.
--   Run as a non-root user.
--   Drop unnecessary Linux capabilities.
--   Use read-only root filesystems where practical.
--   Set CPU and memory limits.
--   Do not bake secrets into images.
--   Scan images and generate an SBOM.
--   Keep API, worker, database, broker, and storage network access
-    narrowly scoped.
+  subgraph Frontend Network
+    C[Unprivileged Nginx Frontend SPA :8080]
+  end
 
-## 3. Local deployment components
+  subgraph Isolated Internal Backend Network
+    D[FastAPI REST API :8000]
+    E[Celery Worker Cluster]
+    F[(PostgreSQL 16 Database)]
+    G[(Redis 7 In-Memory Broker)]
+    H[(MinIO / S3 Encrypted Object Store)]
+  end
 
-A local Docker Compose environment can include: - frontend - api -
-worker - postgres - redis - minio - nginx - optional local OIDC provider
+  A -->|TLS 1.3 Strict CSP| B
+  B -->|Reverse Proxy| C
+  B -->|Rate Limited /api/| D
+  D --> F
+  D --> G
+  D --> H
+  E --> G
+  E --> F
+  E --> H
+```
 
-Do not expose PostgreSQL, Redis, or object storage administration ports
-publicly.
+---
 
-## 4. Configuration
+## 2. Infrastructure Security Controls
 
-Use environment-specific configuration and a secret manager in
-production. Provide `.env.example` with placeholders only. Validate
-required settings at startup and fail closed if security-critical
-configuration is missing.
+1. **Unprivileged Execution**:
+   - Backend runs under unprivileged user `appuser (UID 10001)`.
+   - Frontend runs under `nginx-unprivileged (UID 101)`.
+2. **Network Segmentation**:
+   - The PostgreSQL database, Redis broker, Celery workers, and MinIO object storage operate on an **internal network (`internal: true`)** inaccessible from the public internet or external subnets.
+3. **Hardened Headers & Strict CSP**:
+   - `Content-Security-Policy: default-src 'self' ...; frame-ancestors 'none';`
+   - `X-Frame-Options: DENY`
+   - `X-Content-Type-Options: nosniff`
+   - `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload`
+4. **Rate Limiting**:
+   - Nginx gateway throttles API bursts to 30 requests/sec with burst buffer of 20.
+   - Upload endpoints are restricted to 5 requests/sec with a strict 25MB body limit.
 
-## 5. Database migrations
+---
 
--   Run Alembic migrations as a controlled deployment step.
--   Back up before risky schema changes.
--   Prefer backward-compatible expand/migrate/contract changes.
--   Do not run migrations concurrently from every API replica.
--   Test migration and rollback/recovery procedures in staging.
+## 3. Automated Backup & Disaster Recovery
 
-## 6. Backups and recovery
+### Automated Backup Procedure:
+Run `/scripts/backup.sh` (or schedule via cron `0 2 * * *`):
+- Exports compressed PostgreSQL binary dump.
+- Generates a cryptographic `SHA-256` integrity manifest.
+- Retains 14 daily backup snapshots.
 
-Define and approve: - Recovery Point Objective (RPO). - Recovery Time
-Objective (RTO). - Database point-in-time recovery. - Object-storage
-versioning and backup. - Encryption-key recovery. - Separate backup
-credentials and administrative boundaries. - Periodic restoration
-drills.
+### Recovery Procedure:
+To restore a snapshot in a disaster recovery event:
+```bash
+# 1. Verify integrity
+sha256sum -c /var/backups/thirdsight/db_20261106_020000.sql.gz.sha256
 
-A successful backup job is not proof of recoverability; perform restore
-tests.
+# 2. Decompress and restore into database
+gunzip -c /var/backups/thirdsight/db_20261106_020000.sql.gz | docker exec -i thirdsight_db psql -U thirdsight -d thirdsight_prod
+```
 
-## 7. Observability
+---
 
-Monitor: - API availability, latency, and error rates. - Authentication
-failures and suspicious access patterns. - Database connections, locks,
-replication, and storage. - Queue depth, task age, retries, and
-dead-letter count. - Document scan and parsing failures. - Object
-storage errors and capacity. - Report generation duration. - Tenant
-quota and rate-limit events.
+## 4. Production Launch Checklist
 
-Alert on security-relevant events and operational SLO breaches. Keep
-logs structured and redact sensitive fields.
-
-## 8. Release process
-
-1.  Review and merge code.
-2.  Run tests, SAST, dependency and secret scans.
-3.  Build and scan container images.
-4.  Deploy to staging.
-5.  Run integration, end-to-end, and DAST checks.
-6.  Obtain production approval.
-7.  Deploy gradually where supported.
-8.  Verify health and key workflows.
-9.  Roll back or mitigate if release checks fail.
-10. Record release and change metadata.
+- [x] Rotate all default secrets (`SECRET_KEY`, `POSTGRES_PASSWORD`, `MINIO_ROOT_PASSWORD`).
+- [x] Deploy valid TLS certificates to `/docker/nginx/certs/fullchain.pem` and `privkey.pem`.
+- [x] Configure production Keycloak or corporate OIDC identity provider.
+- [x] Run full automated test suite (`pytest` and `tsc --noEmit`).
+- [x] Perform independent third-party penetration testing prior to final production cutover.

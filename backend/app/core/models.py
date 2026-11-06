@@ -181,6 +181,22 @@ class AIInsightDecision(str, enum.Enum):
     REJECTED = "rejected"
 
 
+# --- Reporting & Notification Enums ---
+
+class ReportType(str, enum.Enum):
+    EXECUTIVE = "executive"
+    TECHNICAL = "technical"
+
+
+class NotificationType(str, enum.Enum):
+    EXPIRY = "expiry"
+    REMINDER = "reminder"
+    FINDING_SLA = "finding_sla"
+    ASSESSMENT = "assessment"
+    SYSTEM = "system"
+
+
+
 
 
 user_roles = Table(
@@ -660,5 +676,60 @@ class AIEvidenceInsight(Base):
     created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
 
     evidence = relationship("Evidence")
+
+
+# ================= REPORTING, NOTIFICATIONS & AUDIT =================
+
+class Report(Base):
+    __tablename__ = "reports"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    assessment_id = Column(String(36), ForeignKey("assessments.id", ondelete="CASCADE"), nullable=False, index=True)
+    organization_id = Column(String(36), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    report_type = Column(SQLEnum(ReportType), nullable=False, default=ReportType.EXECUTIVE)
+    title = Column(String(255), nullable=False)
+    version = Column(Integer, nullable=False, default=1)
+    storage_key = Column(String(255), nullable=False)
+    sha256_hash = Column(String(64), nullable=False, index=True)
+    file_size = Column(Integer, nullable=False)
+
+    generated_by = Column(String(255), nullable=False)
+    generated_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+    assessment = relationship("Assessment")
+
+
+class Notification(Base):
+    __tablename__ = "notifications"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    organization_id = Column(String(36), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=True, index=True)
+
+    recipient_email = Column(String(255), nullable=False)
+    title = Column(String(255), nullable=False)
+    message = Column(Text, nullable=False)
+    notification_type = Column(SQLEnum(NotificationType), nullable=False, default=NotificationType.SYSTEM)
+    is_read = Column(Boolean, nullable=False, default=False)
+
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+
+class AuditEvent(Base):
+    __tablename__ = "audit_events"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    organization_id = Column(String(36), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    actor_email = Column(String(255), nullable=False)
+    action = Column(String(100), nullable=False) # e.g. "auth.login", "risk.accept", "assessment.approve", "report.generate"
+    resource_type = Column(String(50), nullable=False) # e.g. "assessment", "finding", "evidence", "user"
+    resource_id = Column(String(36), nullable=True)
+    details = Column(Text, nullable=True)
+    ip_address = Column(String(45), nullable=True)
+
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+
 
 

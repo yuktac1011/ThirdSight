@@ -15,6 +15,7 @@ from app.features.evidence.router import router as evidence_router
 from app.features.controls.router import router as controls_router
 from app.features.risk.router import router as risk_router
 from app.features.ai.router import router as ai_router
+from app.features.reports.router import router as reports_router
 
 
 @asynccontextmanager
@@ -57,6 +58,7 @@ app.include_router(evidence_router, prefix=settings.API_V1_STR)
 app.include_router(controls_router, prefix=settings.API_V1_STR)
 app.include_router(risk_router, prefix=settings.API_V1_STR)
 app.include_router(ai_router, prefix=settings.API_V1_STR)
+app.include_router(reports_router, prefix=settings.API_V1_STR)
 
 
 

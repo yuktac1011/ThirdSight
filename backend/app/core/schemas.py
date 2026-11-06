@@ -565,3 +565,53 @@ class AIInsightReviewRequest(BaseModel):
     selected_control_codes: Optional[List[str]] = [] # Approved control codes to link evidence to
 
 
+# ================= REPORTING, NOTIFICATIONS & AUDIT SCHEMAS =================
+
+class ReportGenerateRequest(BaseModel):
+    assessment_id: str
+    report_type: str = Field("executive", description="executive or technical")
+
+
+class ReportResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    assessment_id: str
+    organization_id: str
+    report_type: str
+    title: str
+    version: int
+    storage_key: str
+    sha256_hash: str
+    file_size: int
+    generated_by: str
+    generated_at: datetime
+
+
+class NotificationResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    recipient_email: str
+    title: str
+    message: str
+    notification_type: str
+    is_read: bool
+    created_at: datetime
+
+
+class AuditEventResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    organization_id: str
+    actor_email: str
+    action: str
+    resource_type: str
+    resource_id: Optional[str] = None
+    details: Optional[str] = None
+    ip_address: Optional[str] = None
+    created_at: datetime
+
+
+
