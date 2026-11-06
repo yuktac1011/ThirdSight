@@ -115,6 +115,74 @@ class AssignmentStatus(str, enum.Enum):
     FLAGGED = "flagged"
 
 
+# --- Evidence Enums ---
+
+class EvidenceStatus(str, enum.Enum):
+    QUARANTINED = "quarantined"
+    SCANNING = "scanning"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    EXPIRED = "expired"
+
+
+class RejectionReason(str, enum.Enum):
+    MALICIOUS_PAYLOAD = "malicious_payload"
+    MIME_MISMATCH = "mime_mismatch"
+    EXPIRED_CERTIFICATE = "expired_certificate"
+    INSUFFICIENT_DETAIL = "insufficient_detail"
+    UNAUTHORIZED_SCOPE = "unauthorized_scope"
+    TAMPERED_OR_CORRUPT = "tampered_or_corrupt"
+    OTHER = "other"
+
+
+# --- Security Control Enums ---
+
+class ControlEffectiveness(str, enum.Enum):
+    EFFECTIVE = "effective"
+    PARTIALLY_EFFECTIVE = "partially_effective"
+    INEFFECTIVE = "ineffective"
+    NOT_APPLICABLE = "not_applicable"
+    UNASSESSED = "unassessed"
+
+
+# --- Risk & Finding Enums ---
+
+class RiskBand(str, enum.Enum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
+
+
+class FindingSeverity(str, enum.Enum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
+
+
+class FindingStatus(str, enum.Enum):
+    OPEN = "open"
+    IN_REMEDIATION = "in_remediation"
+    ACCEPTED = "accepted"
+    RESOLVED = "resolved"
+
+
+class RemediationStatus(str, enum.Enum):
+    PLANNED = "planned"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    OVERDUE = "overdue"
+
+
+class AIInsightDecision(str, enum.Enum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+
+
+
+
 user_roles = Table(
     "user_roles",
     Base.metadata,
@@ -373,3 +441,224 @@ class AssessmentHistory(Base):
     created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
 
     assessment = relationship("Assessment", back_populates="history")
+
+
+# ================= EVIDENCE & DOCUMENT MANAGEMENT =================
+
+class Evidence(Base):
+    __tablename__ = "evidence"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    organization_id = Column(String(36), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    vendor_id = Column(String(36), ForeignKey("vendors.id", ondelete="CASCADE"), nullable=False, index=True)
+    assessment_id = Column(String(36), ForeignKey("assessments.id", ondelete="SET NULL"), nullable=True, index=True)
+    question_id = Column(String(36), ForeignKey("questions.id", ondelete="SET NULL"), nullable=True, index=True)
+
+    file_name = Column(String(255), nullable=False)
+    file_size = Column(Integer, nullable=False) # In bytes
+    mime_type = Column(String(100), nullable=False)
+    sha256_hash = Column(String(64), nullable=False, index=True)
+    storage_key = Column(String(255), nullable=False, unique=True)
+    status = Column(SQLEnum(EvidenceStatus), nullable=False, default=EvidenceStatus.QUARANTINED)
+
+    # Security verification & scanning
+    scan_result = Column(String(255), nullable=True) # e.g. "Clean - signature OK", "Heuristic match"
+    extracted_text_preview = Column(Text, nullable=True)
+    rejection_reason = Column(SQLEnum(RejectionReason), nullable=True)
+    rejection_comment = Column(Text, nullable=True)
+    reviewer_email = Column(String(255), nullable=True)
+    reviewed_at = Column(DateTime(timezone=True), nullable=True)
+    expires_at = Column(DateTime(timezone=True), nullable=True)
+
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False)
+
+    organization = relationship("Organization")
+    vendor = relationship("Vendor")
+    assessment = relationship("Assessment")
+    question = relationship("Question")
+    control_associations = relationship("ControlEvidenceAssociation", back_populates="evidence", cascade="all, delete-orphan")
+
+
+# ================= SECURITY CONTROLS & FRAMEWORKS =================
+
+class Framework(Base):
+    __tablename__ = "frameworks"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    name = Column(String(100), nullable=False, unique=True, index=True)
+    version = Column(String(50), nullable=False)
+    description = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+    mappings = relationship("ControlFrameworkMapping", back_populates="framework", cascade="all, delete-orphan")
+
+
+class SecurityControl(Base):
+    __tablename__ = "security_controls"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    code = Column(String(50), nullable=False, unique=True, index=True)
+    domain = Column(SQLEnum(SecurityDomain), nullable=False, default=SecurityDomain.ACCESS_CONTROL)
+    title = Column(String(255), nullable=False)
+    description = Column(Text, nullable=False)
+    guidance = Column(Text, nullable=True)
+    version = Column(Integer, nullable=False, default=1)
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+    mappings = relationship("ControlFrameworkMapping", back_populates="control", cascade="all, delete-orphan")
+    assessment_results = relationship("ControlAssessmentResult", back_populates="control", cascade="all, delete-orphan")
+
+
+class ControlFrameworkMapping(Base):
+    __tablename__ = "control_framework_mappings"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    control_id = Column(String(36), ForeignKey("security_controls.id", ondelete="CASCADE"), nullable=False, index=True)
+    framework_id = Column(String(36), ForeignKey("frameworks.id", ondelete="CASCADE"), nullable=False, index=True)
+    framework_ref = Column(String(100), nullable=False) # e.g. "PR.AC-1", "A.5.15", "CC6.1"
+    mapping_notes = Column(Text, nullable=True)
+
+    control = relationship("SecurityControl", back_populates="mappings")
+    framework = relationship("Framework", back_populates="mappings")
+
+
+class ControlAssessmentResult(Base):
+    __tablename__ = "control_assessment_results"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    organization_id = Column(String(36), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    assessment_id = Column(String(36), ForeignKey("assessments.id", ondelete="CASCADE"), nullable=False, index=True)
+    control_id = Column(String(36), ForeignKey("security_controls.id", ondelete="CASCADE"), nullable=False, index=True)
+    
+    effectiveness = Column(SQLEnum(ControlEffectiveness), nullable=False, default=ControlEffectiveness.UNASSESSED)
+    rationale = Column(Text, nullable=True)
+    evaluator_email = Column(String(255), nullable=True)
+    reviewed_at = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False)
+
+    assessment = relationship("Assessment")
+    control = relationship("SecurityControl", back_populates="assessment_results")
+    evidence_associations = relationship("ControlEvidenceAssociation", back_populates="control_result", cascade="all, delete-orphan")
+
+
+class ControlEvidenceAssociation(Base):
+    __tablename__ = "control_evidence_associations"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    control_result_id = Column(String(36), ForeignKey("control_assessment_results.id", ondelete="CASCADE"), nullable=False, index=True)
+    evidence_id = Column(String(36), ForeignKey("evidence.id", ondelete="CASCADE"), nullable=False, index=True)
+    notes = Column(String(255), nullable=True)
+    associated_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+    control_result = relationship("ControlAssessmentResult", back_populates="evidence_associations")
+    evidence = relationship("Evidence", back_populates="control_associations")
+
+
+# ================= RISK ENGINE & REMEDIATION MODELS =================
+
+class RiskScore(Base):
+    __tablename__ = "risk_scores"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    assessment_id = Column(String(36), ForeignKey("assessments.id", ondelete="CASCADE"), nullable=False, unique=True, index=True)
+    organization_id = Column(String(36), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    methodology_version = Column(String(50), nullable=False, default="v1.0-standard")
+
+    likelihood = Column(Integer, nullable=False) # 1 to 5
+    impact = Column(Integer, nullable=False)     # 1 to 5
+    inherent_score = Column(Integer, nullable=False) # 1 to 25
+    inherent_band = Column(SQLEnum(RiskBand), nullable=False)
+
+    control_effectiveness_score = Column(Float, nullable=False) # 0.0 to 1.0
+    residual_score = Column(Integer, nullable=False) # 1 to 25
+    residual_band = Column(SQLEnum(RiskBand), nullable=False)
+
+    explanation = Column(Text, nullable=True)
+    calculated_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+    assessment = relationship("Assessment")
+
+
+class Finding(Base):
+    __tablename__ = "findings"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    assessment_id = Column(String(36), ForeignKey("assessments.id", ondelete="CASCADE"), nullable=False, index=True)
+    organization_id = Column(String(36), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    control_id = Column(String(36), ForeignKey("security_controls.id", ondelete="SET NULL"), nullable=True, index=True)
+
+    title = Column(String(255), nullable=False)
+    description = Column(Text, nullable=False)
+    severity = Column(SQLEnum(FindingSeverity), nullable=False, default=FindingSeverity.MEDIUM)
+    status = Column(SQLEnum(FindingStatus), nullable=False, default=FindingStatus.OPEN)
+
+    identified_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+    closed_at = Column(DateTime(timezone=True), nullable=True)
+
+    control = relationship("SecurityControl")
+    assessment = relationship("Assessment")
+    remediations = relationship("Remediation", back_populates="finding", cascade="all, delete-orphan")
+    risk_acceptance = relationship("RiskAcceptance", back_populates="finding", uselist=False, cascade="all, delete-orphan")
+
+
+class Remediation(Base):
+    __tablename__ = "remediations"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    finding_id = Column(String(36), ForeignKey("findings.id", ondelete="CASCADE"), nullable=False, index=True)
+    organization_id = Column(String(36), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    title = Column(String(255), nullable=False)
+    action_plan = Column(Text, nullable=False)
+    owner_email = Column(String(255), nullable=False)
+    due_date = Column(DateTime(timezone=True), nullable=False)
+    status = Column(SQLEnum(RemediationStatus), nullable=False, default=RemediationStatus.PLANNED)
+
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False)
+
+    finding = relationship("Finding", back_populates="remediations")
+
+
+class RiskAcceptance(Base):
+    __tablename__ = "risk_acceptances"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    finding_id = Column(String(36), ForeignKey("findings.id", ondelete="CASCADE"), nullable=False, unique=True, index=True)
+    assessment_id = Column(String(36), ForeignKey("assessments.id", ondelete="CASCADE"), nullable=False, index=True)
+    organization_id = Column(String(36), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    approver_email = Column(String(255), nullable=False)
+    rationale = Column(Text, nullable=False)
+    compensating_controls = Column(Text, nullable=True)
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+    finding = relationship("Finding", back_populates="risk_acceptance")
+
+
+# ================= AI EVIDENCE INTELLIGENCE MODELS =================
+
+class AIEvidenceInsight(Base):
+    __tablename__ = "ai_evidence_insights"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    evidence_id = Column(String(36), ForeignKey("evidence.id", ondelete="CASCADE"), nullable=False, index=True)
+    organization_id = Column(String(36), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    summary = Column(Text, nullable=False)
+    confidence_score = Column(Float, nullable=False, default=0.85)
+    suggested_mappings_json = Column(Text, nullable=False) # JSON serialized list of suggested control mappings
+    claims_comparison_json = Column(Text, nullable=True)   # JSON serialized comparison of claims vs evidence
+    prompt_sanitization_log = Column(String(255), nullable=True)
+
+    decision = Column(SQLEnum(AIInsightDecision), nullable=False, default=AIInsightDecision.PENDING)
+    reviewed_by = Column(String(255), nullable=True)
+    reviewed_at = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+    evidence = relationship("Evidence")
+
+

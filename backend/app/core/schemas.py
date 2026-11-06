@@ -316,3 +316,252 @@ class AssessmentResponse(BaseModel):
     completion_percentage: int = 0
     answers: List[AnswerResponse] = []
     history: List[AssessmentHistoryResponse] = []
+
+
+# ================= EVIDENCE & DOCUMENT SCHEMAS =================
+
+class EvidenceReviewRequest(BaseModel):
+    action: str = Field(..., description="approve or reject")
+    rejection_reason: Optional[str] = None
+    rejection_comment: Optional[str] = None
+
+
+class EvidenceResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    organization_id: str
+    vendor_id: str
+    assessment_id: Optional[str] = None
+    question_id: Optional[str] = None
+    file_name: str
+    file_size: int
+    mime_type: str
+    sha256_hash: str
+    storage_key: str
+    status: str
+    scan_result: Optional[str] = None
+    extracted_text_preview: Optional[str] = None
+    rejection_reason: Optional[str] = None
+    rejection_comment: Optional[str] = None
+    reviewer_email: Optional[str] = None
+    reviewed_at: Optional[datetime] = None
+    expires_at: Optional[datetime] = None
+    created_at: datetime
+    updated_at: datetime
+    vendor_name: Optional[str] = None
+
+
+# ================= SECURITY CONTROLS & FRAMEWORKS SCHEMAS =================
+
+class FrameworkBase(BaseModel):
+    name: str
+    version: str
+    description: Optional[str] = None
+
+
+class FrameworkResponse(FrameworkBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    created_at: datetime
+
+
+class ControlMappingBase(BaseModel):
+    framework_id: str
+    framework_ref: str
+    mapping_notes: Optional[str] = None
+
+
+class ControlMappingResponse(ControlMappingBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    control_id: str
+    framework_name: Optional[str] = None
+    framework_version: Optional[str] = None
+
+
+class SecurityControlBase(BaseModel):
+    code: str
+    domain: str
+    title: str
+    description: str
+    guidance: Optional[str] = None
+    version: int = 1
+
+
+class SecurityControlCreate(SecurityControlBase):
+    framework_mappings: Optional[List[ControlMappingBase]] = []
+
+
+class SecurityControlResponse(SecurityControlBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    created_at: datetime
+    mappings: List[ControlMappingResponse] = []
+
+
+class ControlAssessmentEvaluateRequest(BaseModel):
+    effectiveness: str = Field(..., description="effective, partially_effective, ineffective, not_applicable")
+    rationale: Optional[str] = None
+    evidence_ids: Optional[List[str]] = []
+
+
+class ControlAssessmentResultResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    assessment_id: str
+    control_id: str
+    control_code: Optional[str] = None
+    control_title: Optional[str] = None
+    control_domain: Optional[str] = None
+    effectiveness: str
+    rationale: Optional[str] = None
+    evaluator_email: Optional[str] = None
+    reviewed_at: Optional[datetime] = None
+    created_at: datetime
+    updated_at: datetime
+    associated_evidence_ids: List[str] = []
+
+
+class FrameworkCoverageMetric(BaseModel):
+    framework_name: str
+    framework_version: str
+    total_controls: int
+    evaluated_controls: int
+    effective_controls: int
+    partially_effective_controls: int
+    ineffective_controls: int
+    coverage_percentage: int
+
+
+# ================= RISK ENGINE & REMEDIATION SCHEMAS =================
+
+class RiskScoreResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    assessment_id: str
+    organization_id: str
+    methodology_version: str
+    likelihood: int
+    impact: int
+    inherent_score: int
+    inherent_band: str
+    control_effectiveness_score: float
+    residual_score: int
+    residual_band: str
+    explanation: Optional[str] = None
+    calculated_at: datetime
+
+
+class FindingBase(BaseModel):
+    title: str = Field(..., min_length=3, max_length=255)
+    description: str
+    severity: str = Field("medium", description="low, medium, high, critical")
+
+
+class FindingCreate(FindingBase):
+    control_id: Optional[str] = None
+
+
+class RemediationCreate(BaseModel):
+    title: str = Field(..., min_length=3, max_length=255)
+    action_plan: str
+    owner_email: EmailStr
+    due_date: datetime
+
+
+class RemediationUpdate(BaseModel):
+    status: str = Field(..., description="planned, in_progress, completed, overdue")
+    action_plan: Optional[str] = None
+
+
+class RemediationResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    finding_id: str
+    title: str
+    action_plan: str
+    owner_email: str
+    due_date: datetime
+    status: str
+    created_at: datetime
+    updated_at: datetime
+
+
+class RiskAcceptanceRequest(BaseModel):
+    rationale: str = Field(..., min_length=10)
+    compensating_controls: Optional[str] = None
+    expires_at: datetime
+
+
+class RiskAcceptanceResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    finding_id: str
+    approver_email: str
+    rationale: str
+    compensating_controls: Optional[str] = None
+    expires_at: datetime
+    created_at: datetime
+
+
+class FindingResponse(FindingBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    assessment_id: str
+    organization_id: str
+    control_id: Optional[str] = None
+    control_code: Optional[str] = None
+    status: str
+    identified_at: datetime
+    closed_at: Optional[datetime] = None
+    remediations: List[RemediationResponse] = []
+    risk_acceptance: Optional[RiskAcceptanceResponse] = None
+
+
+# ================= AI EVIDENCE INTELLIGENCE SCHEMAS =================
+
+class AISuggestedMapping(BaseModel):
+    control_code: str
+    control_title: str
+    relevance_score: float # 0.0 to 1.0
+    citation: str
+    page_reference: Optional[str] = None
+    rationale: str
+
+
+class AIClaimDiscrepancy(BaseModel):
+    vendor_claim: str
+    evidence_fact: str
+    discrepancy_level: str # aligned, partial_conflict, direct_contradiction
+    analysis: str
+
+
+class AIEvidenceInsightResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    evidence_id: str
+    summary: str
+    confidence_score: float
+    suggested_mappings: List[AISuggestedMapping] = []
+    discrepancies: List[AIClaimDiscrepancy] = []
+    decision: str
+    reviewed_by: Optional[str] = None
+    reviewed_at: Optional[datetime] = None
+    created_at: datetime
+
+
+class AIInsightReviewRequest(BaseModel):
+    decision: str = Field(..., description="approve or reject")
+    selected_control_codes: Optional[List[str]] = [] # Approved control codes to link evidence to
+
+

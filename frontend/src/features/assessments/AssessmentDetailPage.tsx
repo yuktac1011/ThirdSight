@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { LoadingState, ErrorState } from '@/components/common/FeedbackStates';
 import { AssessmentStatusBadge } from './components/AssessmentStatusBadge';
+import { AssessmentControlsTab } from './AssessmentControlsTab';
 import {
   ArrowLeft,
   CheckCircle2,
@@ -20,6 +21,7 @@ import {
   Lock,
   ExternalLink,
   History,
+  Layers,
 } from 'lucide-react';
 
 export const AssessmentDetailPage: React.FC = () => {
@@ -31,6 +33,7 @@ export const AssessmentDetailPage: React.FC = () => {
 
   const [reviewNotes, setReviewNotes] = useState('');
   const [reviewError, setReviewError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'questionnaire' | 'controls'>('questionnaire');
 
   const {
     data: assessment,
@@ -167,11 +170,43 @@ export const AssessmentDetailPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left: Questions & Recorded Answers */}
         <div className="lg:col-span-2 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-800">
-              Evaluation Controls & Responses ({template?.questions.length || 0})
-            </h3>
+          {/* Navigation Tabs */}
+          <div className="flex border-b border-slate-200 gap-4 mb-4">
+            <button
+              type="button"
+              onClick={() => setActiveTab('questionnaire')}
+              className={`pb-3 text-sm font-semibold border-b-2 transition-all flex items-center gap-2 ${
+                activeTab === 'questionnaire'
+                  ? 'border-brand-600 text-brand-600'
+                  : 'border-transparent text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <FileText className="h-4 w-4" />
+              Questionnaire Responses ({template?.questions.length || 0})
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('controls')}
+              className={`pb-3 text-sm font-semibold border-b-2 transition-all flex items-center gap-2 ${
+                activeTab === 'controls'
+                  ? 'border-brand-600 text-brand-600'
+                  : 'border-transparent text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <Layers className="h-4 w-4" />
+              Security Controls & Framework Mapping
+            </button>
           </div>
+
+          {activeTab === 'controls' ? (
+            <AssessmentControlsTab assessmentId={assessment.id} vendorId={assessment.vendor_id} />
+          ) : (
+            <>
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-800">
+                  Evaluation Controls & Responses ({template?.questions.length || 0})
+                </h3>
+              </div>
 
           {template?.questions.map((q, idx) => {
             const ans = answersMap.get(q.id);
@@ -235,6 +270,8 @@ export const AssessmentDetailPage: React.FC = () => {
               </Card>
             );
           })}
+            </>
+          )}
         </div>
 
         {/* Right: SecOps Review & Audit Trail */}

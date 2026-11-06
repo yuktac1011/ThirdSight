@@ -11,6 +11,10 @@ STANDARD_ROLES_PERMISSIONS = {
         "user:read", "user:create", "user:update", "user:delete", "user:invite",
         "vendor:read", "vendor:write",
         "assessment:read", "assessment:write", "assessment:evaluate",
+        "evidence:read", "evidence:write", "evidence:review",
+        "control:read", "control:write",
+        "risk:read", "risk:calculate", "risk:accept", "remediation:write",
+        "ai:read", "ai:analyze", "ai:review",
         "report:read", "report:generate",
         "audit:read",
     ],
@@ -19,6 +23,10 @@ STANDARD_ROLES_PERMISSIONS = {
         "user:read",
         "vendor:read", "vendor:write",
         "assessment:read", "assessment:write", "assessment:evaluate",
+        "evidence:read", "evidence:write", "evidence:review",
+        "control:read", "control:write",
+        "risk:read", "risk:calculate", "remediation:write",
+        "ai:read", "ai:analyze", "ai:review",
         "report:read", "report:generate",
     ],
     "auditor": [
@@ -26,12 +34,18 @@ STANDARD_ROLES_PERMISSIONS = {
         "user:read",
         "vendor:read",
         "assessment:read",
+        "evidence:read",
+        "control:read",
+        "risk:read",
+        "ai:read",
         "report:read",
         "audit:read",
     ],
     "vendor_user": [
         "assessment:read",
         "assessment:write", # response submission
+        "evidence:read",
+        "evidence:write", # evidence attachment upload
     ]
 }
 

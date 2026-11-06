@@ -13,11 +13,11 @@ import { TemplateDetailPage } from '@/features/questionnaires/TemplateDetailPage
 import { AssessmentDashboardPage } from '@/features/assessments/AssessmentDashboardPage';
 import { AssessmentDetailPage } from '@/features/assessments/AssessmentDetailPage';
 import { VendorResponsePortalPage } from '@/features/assessments/VendorResponsePortalPage';
+import { EvidencePage } from '@/features/evidence/EvidencePage';
+import { ControlsPage } from '@/features/controls/ControlsPage';
+import { RiskDashboardPage } from '@/features/risk/RiskDashboardPage';
 import { ProtectedRoute } from '@/routes/ProtectedRoute';
 import {
-  FileCheck,
-  Layers,
-  ShieldAlert,
   FileText,
 } from 'lucide-react';
 
@@ -47,37 +47,14 @@ export const AppRoutes: React.FC = () => {
           <Route path="assessments/:assessmentId" element={<AssessmentDetailPage />} />
           <Route path="assessments/:assessmentId/respond" element={<VendorResponsePortalPage />} />
 
-          {/* Feature Navigation Modules (Upcoming Increments) */}
-          <Route
-            path="evidence"
-            element={
-              <PlaceholderView
-                moduleName="Evidence"
-                description="Central repository for SOC reports, ISO certs, penetration test results, and policy documents."
-                icon={<FileCheck className="h-6 w-6 text-brand-600" />}
-              />
-            }
-          />
-          <Route
-            path="security-controls"
-            element={
-              <PlaceholderView
-                moduleName="Security Controls"
-                description="Catalog of organizational controls mapped against NIST, ISO 27001, and SOC 2."
-                icon={<Layers className="h-6 w-6 text-brand-600" />}
-              />
-            }
-          />
-          <Route
-            path="risk-analysis"
-            element={
-              <PlaceholderView
-                moduleName="Risk Analysis"
-                description="Threat modeling, vulnerability telemetry, and continuous automated risk scoring."
-                icon={<ShieldAlert className="h-6 w-6 text-brand-600" />}
-              />
-            }
-          />
+          {/* Evidence Management (Increment 07) */}
+          <Route path="evidence" element={<EvidencePage />} />
+
+          {/* Security Controls & Framework Crosswalk (Increment 08) */}
+          <Route path="security-controls" element={<ControlsPage />} />
+
+          {/* Risk Engine, Gap Analysis & Remediation (Increment 09) */}
+          <Route path="risk-analysis" element={<RiskDashboardPage />} />
           <Route
             path="reports"
             element={

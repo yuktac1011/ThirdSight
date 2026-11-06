@@ -30,6 +30,17 @@ class Settings(BaseSettings):
         "http://localhost:5173",
     ]
 
+    # Evidence & Storage
+    STORAGE_BACKEND: str = "local" # "local" or "s3"
+    STORAGE_LOCAL_ROOT: str = (REPO_ROOT / "data" / "evidence").as_posix()
+    S3_ENDPOINT_URL: Optional[str] = None
+    S3_BUCKET_NAME: str = "thirdsight-evidence"
+    S3_ACCESS_KEY: Optional[str] = None
+    S3_SECRET_KEY: Optional[str] = None
+    S3_REGION: str = "us-east-1"
+    MAX_EVIDENCE_SIZE_BYTES: int = 25 * 1024 * 1024 # 25 MB
+
+
     model_config = {
         "env_file": ".env",
         "case_sensitive": True,
