@@ -12,6 +12,13 @@ from app.core.models import (
     VendorStatus,
     DataClassification,
     AccessLevel,
+    QuestionnaireTemplate,
+    Question,
+    QuestionType,
+    SecurityDomain,
+    TemplateStatus,
+    QuestionnaireAssignment,
+    AssignmentStatus,
 )
 from app.core.init_db import seed_roles_and_permissions
 
@@ -66,8 +73,8 @@ def seed_dev_data():
             db.add(analyst_user)
 
         # Seed initial enterprise vendors for CyberGuard Corp
-        existing_vendor_count = db.query(Vendor).filter(Vendor.organization_id == org.id).count()
-        if existing_vendor_count == 0:
+        v1 = db.query(Vendor).filter(Vendor.organization_id == org.id, Vendor.name == "CloudScale Infrastructure").first()
+        if not v1:
             v1 = Vendor(
                 id=str(uuid.uuid4()),
                 organization_id=org.id,
@@ -91,7 +98,10 @@ def seed_dev_data():
                 title="Lead Security Architect",
                 is_primary=True,
             )
+            db.add_all([v1, v1_contact])
 
+        v2 = db.query(Vendor).filter(Vendor.organization_id == org.id, Vendor.name == "PayBridge Gateways Inc").first()
+        if not v2:
             v2 = Vendor(
                 id=str(uuid.uuid4()),
                 organization_id=org.id,
@@ -115,50 +125,90 @@ def seed_dev_data():
                 title="VP Compliance & Risk",
                 is_primary=True,
             )
+            db.add_all([v2, v2_contact])
 
-            v3 = Vendor(
+        # Seed standard security questionnaire templates if none exist
+        existing_t_count = db.query(QuestionnaireTemplate).filter(QuestionnaireTemplate.organization_id == org.id).count()
+        if existing_t_count == 0:
+            t1 = QuestionnaireTemplate(
                 id=str(uuid.uuid4()),
                 organization_id=org.id,
-                name="OmniAnalytics Data Labs",
-                website="https://omnidata.io",
-                industry="Big Data & ML",
-                service_category="Analytics & BI",
-                service_description="Customer journey analytics pipeline and marketing reporting.",
-                criticality=VendorCriticality.TIER_2,
-                status=VendorStatus.ACTIVE,
-                data_classification=DataClassification.INTERNAL,
-                access_level=AccessLevel.DATABASE,
-                risk_score=91,
+                title="Standard Information Gathering (SIG Lite 2026)",
+                description="Comprehensive third-party vendor baseline risk assessment evaluating access controls, encryption, and business continuity.",
+                framework_tag="SIG Lite / ISO 27001",
+                status=TemplateStatus.PUBLISHED,
+                version=1,
             )
-            v3_contact = VendorContact(
-                id=str(uuid.uuid4()),
-                vendor_id=v3.id,
-                name="David Chen",
-                email="dchen@omnidata.io",
-                phone="+1-555-442-990",
-                title="Customer Security Manager",
-                is_primary=True,
-            )
+            db.add(t1)
+            db.flush()
 
-            v4 = Vendor(
+            q1 = Question(
                 id=str(uuid.uuid4()),
-                organization_id=org.id,
-                name="LogiHost Mesh Solutions",
-                website="https://logihost-mesh.net",
-                industry="Telecommunications",
-                service_category="CDN & DNS",
-                service_description="Edge content delivery and DDoS mitigation proxy.",
-                criticality=VendorCriticality.TIER_3,
-                status=VendorStatus.MONITORED,
-                data_classification=DataClassification.PUBLIC,
-                access_level=AccessLevel.NETWORK,
-                risk_score=48,
+                template_id=t1.id,
+                order_index=1,
+                domain=SecurityDomain.ACCESS_CONTROL,
+                text="Is Multi-Factor Authentication (MFA) strictly enforced for all administrative and remote employee access?",
+                guidance="Provide details on authentication enforcement methods (e.g., FIDO2 hardware keys, authenticator app).",
+                question_type=QuestionType.CHOICE_PARTIAL,
+                weight=2.0,
+                is_mandatory=True,
+                requires_evidence=True,
             )
+            q2 = Question(
+                id=str(uuid.uuid4()),
+                template_id=t1.id,
+                order_index=2,
+                domain=SecurityDomain.DATA_PROTECTION,
+                text="Is all confidential and sensitive customer data encrypted at rest using AES-256 or stronger?",
+                guidance="Confirm KMS architecture, key rotation cadence, and envelope encryption policies.",
+                question_type=QuestionType.CHOICE_PARTIAL,
+                weight=2.0,
+                is_mandatory=True,
+                requires_evidence=True,
+            )
+            q3 = Question(
+                id=str(uuid.uuid4()),
+                template_id=t1.id,
+                order_index=3,
+                domain=SecurityDomain.VULNERABILITY_MGMT,
+                text="Are independent third-party penetration tests executed at least annually against all production systems?",
+                guidance="Attach the executive summary or letter of attestation from your most recent assessment.",
+                question_type=QuestionType.CHOICE_PARTIAL,
+                weight=1.5,
+                is_mandatory=True,
+                requires_evidence=True,
+            )
+            q4 = Question(
+                id=str(uuid.uuid4()),
+                template_id=t1.id,
+                order_index=4,
+                domain=SecurityDomain.INCIDENT_RESPONSE,
+                text="Do you maintain a documented Incident Response plan that guarantees critical security breach notification within 24 hours?",
+                guidance="Outline escalation paths and regulatory SLA notification commitments.",
+                question_type=QuestionType.YES_NO,
+                weight=1.5,
+                is_mandatory=True,
+                requires_evidence=False,
+            )
+            db.add_all([q1, q2, q3, q4])
 
-            db.add_all([v1, v1_contact, v2, v2_contact, v3, v3_contact, v4])
+            # Seed an active assignment for PayBridge Gateways
+            if v2:
+                assign = QuestionnaireAssignment(
+                    id=str(uuid.uuid4()),
+                    organization_id=org.id,
+                    vendor_id=v2.id,
+                    template_id=t1.id,
+                    template_version=1,
+                    status=AssignmentStatus.IN_PROGRESS,
+                    assigned_to_email="compliance@paybridge-api.com",
+                    notes="Annual SIG Lite audit required for Tier-1 checkout gateway.",
+                    completion_percentage=25,
+                )
+                db.add(assign)
 
         db.commit()
-        print("Successfully seeded CyberGuard Global Corp, demo users, and realistic vendor inventory.")
+        print("Successfully seeded CyberGuard Corp templates, questions, and assignments.")
     finally:
         db.close()
 

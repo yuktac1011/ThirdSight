@@ -8,10 +8,12 @@ import { UnauthorizedPage } from '@/features/auth/UnauthorizedPage';
 import { SettingsPage } from '@/features/settings/SettingsPage';
 import { VendorListPage } from '@/features/vendors/VendorListPage';
 import { VendorDetailPage } from '@/features/vendors/VendorDetailPage';
+import { QuestionnaireDashboardPage } from '@/features/questionnaires/QuestionnaireDashboardPage';
+import { TemplateDetailPage } from '@/features/questionnaires/TemplateDetailPage';
+import { AssessmentResponsePage } from '@/features/questionnaires/AssessmentResponsePage';
 import { ProtectedRoute } from '@/routes/ProtectedRoute';
 import {
   ClipboardCheck,
-  FileQuestion,
   FileCheck,
   Layers,
   ShieldAlert,
@@ -35,6 +37,11 @@ export const AppRoutes: React.FC = () => {
           <Route path="vendors" element={<VendorListPage />} />
           <Route path="vendors/:vendorId" element={<VendorDetailPage />} />
 
+          {/* Questionnaires Engine (Increment 04 Real Implementation) */}
+          <Route path="questionnaires" element={<QuestionnaireDashboardPage />} />
+          <Route path="questionnaires/templates/:templateId" element={<TemplateDetailPage />} />
+          <Route path="questionnaires/assignments/:assignmentId" element={<AssessmentResponsePage />} />
+
           {/* Feature Navigation Modules (Upcoming Increments) */}
           <Route
             path="assessments"
@@ -43,16 +50,6 @@ export const AppRoutes: React.FC = () => {
                 moduleName="Assessments"
                 description="Coordinate security assessments, audits, and compliance evaluation cycles."
                 icon={<ClipboardCheck className="h-6 w-6 text-brand-600" />}
-              />
-            }
-          />
-          <Route
-            path="questionnaires"
-            element={
-              <PlaceholderView
-                moduleName="Questionnaires"
-                description="Build, dispatch, and review industry standard (SIG, CAIQ, CIS) questionnaires."
-                icon={<FileQuestion className="h-6 w-6 text-brand-600" />}
               />
             }
           />

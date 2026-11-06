@@ -1,5 +1,10 @@
 from pydantic_settings import BaseSettings
 from typing import List, Optional
+from pathlib import Path
+
+# Anchor sqlite db to repository root so it resolves consistently regardless of working directory
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
+DEFAULT_SQLITE_PATH = (REPO_ROOT / "thirdsight.db").as_posix()
 
 
 class Settings(BaseSettings):
@@ -10,7 +15,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     
     # Database
-    DATABASE_URL: str = "sqlite:///./thirdsight.db"
+    DATABASE_URL: str = f"sqlite:///{DEFAULT_SQLITE_PATH}"
     
     # OIDC / Keycloak
     KEYCLOAK_URL: Optional[str] = "http://localhost:8080"

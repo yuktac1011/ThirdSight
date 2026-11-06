@@ -11,6 +11,7 @@ from sqlalchemy import (
     Boolean,
     Table,
     Integer,
+    Float,
 )
 from sqlalchemy.orm import relationship
 from app.core.database import Base
@@ -68,6 +69,39 @@ class AccessLevel(str, enum.Enum):
     ADMINISTRATIVE = "administrative"
 
 
+# --- Questionnaire Enums ---
+
+class TemplateStatus(str, enum.Enum):
+    DRAFT = "draft"
+    PUBLISHED = "published"
+    ARCHIVED = "archived"
+
+
+class QuestionType(str, enum.Enum):
+    YES_NO = "yes_no"
+    YES_NO_NA = "yes_no_na"
+    CHOICE_PARTIAL = "choice_partial"  # Yes / Partial / No / N/A
+    TEXT = "text"
+
+
+class SecurityDomain(str, enum.Enum):
+    ACCESS_CONTROL = "Access Control & Identity"
+    DATA_PROTECTION = "Data Protection & Cryptography"
+    NETWORK_SECURITY = "Network Security & Architecture"
+    INCIDENT_RESPONSE = "Incident Response & Resiliency"
+    COMPLIANCE_AUDIT = "Regulatory Compliance & Audit"
+    VULNERABILITY_MGMT = "Vulnerability & Patch Management"
+    THIRD_PARTY_GOVERNANCE = "Third-Party & Supply Chain"
+    PHYSICAL_ENVIRONMENTAL = "Physical & Environmental"
+
+
+class AssignmentStatus(str, enum.Enum):
+    PENDING = "pending"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    FLAGGED = "flagged"
+
+
 user_roles = Table(
     "user_roles",
     Base.metadata,
@@ -96,6 +130,8 @@ class Organization(Base):
     users = relationship("User", back_populates="organization", cascade="all, delete-orphan")
     invitations = relationship("Invitation", back_populates="organization", cascade="all, delete-orphan")
     vendors = relationship("Vendor", back_populates="organization", cascade="all, delete-orphan")
+    questionnaire_templates = relationship("QuestionnaireTemplate", back_populates="organization", cascade="all, delete-orphan")
+    questionnaire_assignments = relationship("QuestionnaireAssignment", back_populates="organization", cascade="all, delete-orphan")
 
 
 class Permission(Base):
@@ -164,13 +200,14 @@ class Vendor(Base):
     data_classification = Column(SQLEnum(DataClassification), nullable=False, default=DataClassification.CONFIDENTIAL)
     access_level = Column(SQLEnum(AccessLevel), nullable=False, default=AccessLevel.APPLICATION)
     
-    risk_score = Column(Integer, nullable=False, default=70) # Baseline normalized posture score
+    risk_score = Column(Integer, nullable=False, default=70)
     
     created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
     updated_at = Column(DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False)
 
     organization = relationship("Organization", back_populates="vendors")
     contacts = relationship("VendorContact", back_populates="vendor", cascade="all, delete-orphan")
+    assignments = relationship("QuestionnaireAssignment", back_populates="vendor", cascade="all, delete-orphan")
 
 
 class VendorContact(Base):
@@ -186,3 +223,87 @@ class VendorContact(Base):
     created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
 
     vendor = relationship("Vendor", back_populates="contacts")
+
+
+# ================= QUESTIONNAIRE MODELS =================
+
+class QuestionnaireTemplate(Base):
+    __tablename__ = "questionnaire_templates"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    organization_id = Column(String(36), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    title = Column(String(255), nullable=False, index=True)
+    description = Column(Text, nullable=True)
+    version = Column(Integer, nullable=False, default=1)
+    status = Column(SQLEnum(TemplateStatus), nullable=False, default=TemplateStatus.DRAFT)
+    framework_tag = Column(String(100), nullable=False, default="Custom SecOps") # e.g. SOC 2, ISO 27001, SIG Lite
+    
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False)
+
+    organization = relationship("Organization", back_populates="questionnaire_templates")
+    questions = relationship("Question", back_populates="template", cascade="all, delete-orphan", order_by="Question.order_index")
+    assignments = relationship("QuestionnaireAssignment", back_populates="template", cascade="all, delete-orphan")
+
+
+class Question(Base):
+    __tablename__ = "questions"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    template_id = Column(String(36), ForeignKey("questionnaire_templates.id", ondelete="CASCADE"), nullable=False, index=True)
+    order_index = Column(Integer, nullable=False, default=0)
+    domain = Column(SQLEnum(SecurityDomain), nullable=False, default=SecurityDomain.ACCESS_CONTROL)
+    text = Column(Text, nullable=False)
+    guidance = Column(Text, nullable=True)
+    question_type = Column(SQLEnum(QuestionType), nullable=False, default=QuestionType.CHOICE_PARTIAL)
+    weight = Column(Float, nullable=False, default=1.0) # Weight multiplier for scoring
+    is_mandatory = Column(Boolean, default=True, nullable=False)
+    requires_evidence = Column(Boolean, default=False, nullable=False)
+
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+    template = relationship("QuestionnaireTemplate", back_populates="questions")
+    answers = relationship("QuestionAnswer", back_populates="question", cascade="all, delete-orphan")
+
+
+class QuestionnaireAssignment(Base):
+    __tablename__ = "questionnaire_assignments"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    organization_id = Column(String(36), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    vendor_id = Column(String(36), ForeignKey("vendors.id", ondelete="CASCADE"), nullable=False, index=True)
+    template_id = Column(String(36), ForeignKey("questionnaire_templates.id", ondelete="CASCADE"), nullable=False, index=True)
+    template_version = Column(Integer, nullable=False)
+    
+    status = Column(SQLEnum(AssignmentStatus), nullable=False, default=AssignmentStatus.PENDING)
+    due_date = Column(DateTime(timezone=True), nullable=True)
+    assigned_to_email = Column(String(255), nullable=True)
+    notes = Column(Text, nullable=True)
+    completion_percentage = Column(Integer, nullable=False, default=0)
+
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False)
+
+    organization = relationship("Organization", back_populates="questionnaire_assignments")
+    vendor = relationship("Vendor", back_populates="assignments")
+    template = relationship("QuestionnaireTemplate", back_populates="assignments")
+    answers = relationship("QuestionAnswer", back_populates="assignment", cascade="all, delete-orphan")
+
+
+class QuestionAnswer(Base):
+    __tablename__ = "question_answers"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    assignment_id = Column(String(36), ForeignKey("questionnaire_assignments.id", ondelete="CASCADE"), nullable=False, index=True)
+    question_id = Column(String(36), ForeignKey("questions.id", ondelete="CASCADE"), nullable=False, index=True)
+    
+    # Value can be 'yes', 'no', 'partial', 'na', or string for text questions
+    response_value = Column(String(100), nullable=False)
+    justification = Column(Text, nullable=True) # Required if response is 'na' or 'partial'
+    evidence_reference = Column(String(255), nullable=True) # Pointer or key to uploaded artifact
+    
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False)
+
+    assignment = relationship("QuestionnaireAssignment", back_populates="answers")
+    question = relationship("Question", back_populates="answers")

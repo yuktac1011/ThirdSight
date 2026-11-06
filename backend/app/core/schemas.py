@@ -154,3 +154,112 @@ class VendorResponse(VendorBase):
     created_at: datetime
     updated_at: datetime
     contacts: List[VendorContactResponse] = []
+
+
+# ================= QUESTIONNAIRE SCHEMAS =================
+
+class QuestionBase(BaseModel):
+    order_index: int = 0
+    domain: str = Field("Access Control & Identity")
+    text: str = Field(..., min_length=5)
+    guidance: Optional[str] = None
+    question_type: str = Field("choice_partial", description="yes_no, yes_no_na, choice_partial, text")
+    weight: float = Field(1.0, ge=0.1, le=10.0)
+    is_mandatory: bool = True
+    requires_evidence: bool = False
+
+
+class QuestionCreate(QuestionBase):
+    pass
+
+
+class QuestionUpdate(BaseModel):
+    order_index: Optional[int] = None
+    domain: Optional[str] = None
+    text: Optional[str] = Field(None, min_length=5)
+    guidance: Optional[str] = None
+    question_type: Optional[str] = None
+    weight: Optional[float] = Field(None, ge=0.1, le=10.0)
+    is_mandatory: Optional[bool] = None
+    requires_evidence: Optional[bool] = None
+
+
+class QuestionResponse(QuestionBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    template_id: str
+    created_at: datetime
+
+
+class QuestionnaireTemplateBase(BaseModel):
+    title: str = Field(..., min_length=3, max_length=255)
+    description: Optional[str] = None
+    framework_tag: str = Field("Custom SecOps", max_length=100)
+    status: str = Field("draft", description="draft, published, archived")
+
+
+class QuestionnaireTemplateCreate(QuestionnaireTemplateBase):
+    questions: Optional[List[QuestionCreate]] = []
+
+
+class QuestionnaireTemplateUpdate(BaseModel):
+    title: Optional[str] = Field(None, min_length=3, max_length=255)
+    description: Optional[str] = None
+    framework_tag: Optional[str] = None
+    status: Optional[str] = None
+
+
+class QuestionnaireTemplateResponse(QuestionnaireTemplateBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    organization_id: str
+    version: int
+    created_at: datetime
+    updated_at: datetime
+    questions: List[QuestionResponse] = []
+
+
+class QuestionnaireAssignmentCreate(BaseModel):
+    vendor_id: str
+    template_id: str
+    due_date: Optional[datetime] = None
+    assigned_to_email: Optional[EmailStr] = None
+    notes: Optional[str] = None
+
+
+class AnswerSubmission(BaseModel):
+    question_id: str
+    response_value: str
+    justification: Optional[str] = None
+    evidence_reference: Optional[str] = None
+
+
+class AnswerResponse(AnswerSubmission):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    assignment_id: str
+    created_at: datetime
+    updated_at: datetime
+
+
+class QuestionnaireAssignmentResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    organization_id: str
+    vendor_id: str
+    template_id: str
+    template_version: int
+    status: str
+    due_date: Optional[datetime] = None
+    assigned_to_email: Optional[str] = None
+    notes: Optional[str] = None
+    completion_percentage: int
+    created_at: datetime
+    updated_at: datetime
+    vendor_name: Optional[str] = None
+    template_title: Optional[str] = None
+    answers: List[AnswerResponse] = []

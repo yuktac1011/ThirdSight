@@ -122,7 +122,113 @@ export interface VendorUpdatePayload {
   risk_score?: number;
 }
 
-// Scaffolding types for other modules
+// ================= QUESTIONNAIRE TYPES =================
+
+export type TemplateStatusType = 'draft' | 'published' | 'archived';
+
+export type QuestionTypeValue = 'yes_no' | 'yes_no_na' | 'choice_partial' | 'text';
+
+export type SecurityDomainType =
+  | 'Access Control & Identity'
+  | 'Data Protection & Cryptography'
+  | 'Network Security & Architecture'
+  | 'Incident Response & Resiliency'
+  | 'Regulatory Compliance & Audit'
+  | 'Vulnerability & Patch Management'
+  | 'Third-Party & Supply Chain'
+  | 'Physical & Environmental';
+
+export type AssignmentStatusType = 'pending' | 'in_progress' | 'completed' | 'flagged';
+
+export interface QuestionEntity {
+  id: string;
+  template_id: string;
+  order_index: number;
+  domain: SecurityDomainType;
+  text: string;
+  guidance?: string | null;
+  question_type: QuestionTypeValue;
+  weight: number;
+  is_mandatory: boolean;
+  requires_evidence: boolean;
+  created_at: string;
+}
+
+export interface QuestionnaireTemplateEntity {
+  id: string;
+  organization_id: string;
+  title: string;
+  description?: string | null;
+  framework_tag: string;
+  status: TemplateStatusType;
+  version: number;
+  created_at: string;
+  updated_at: string;
+  questions: QuestionEntity[];
+}
+
+export interface QuestionnaireTemplateCreatePayload {
+  title: string;
+  description?: string;
+  framework_tag?: string;
+  status?: TemplateStatusType;
+  questions?: {
+    order_index?: number;
+    domain: SecurityDomainType;
+    text: string;
+    guidance?: string;
+    question_type: QuestionTypeValue;
+    weight?: number;
+    is_mandatory?: boolean;
+    requires_evidence?: boolean;
+  }[];
+}
+
+export interface QuestionAnswerEntity {
+  id: string;
+  assignment_id: string;
+  question_id: string;
+  response_value: string;
+  justification?: string | null;
+  evidence_reference?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface QuestionnaireAssignmentEntity {
+  id: string;
+  organization_id: string;
+  vendor_id: string;
+  template_id: string;
+  template_version: number;
+  status: AssignmentStatusType;
+  due_date?: string | null;
+  assigned_to_email?: string | null;
+  notes?: string | null;
+  completion_percentage: number;
+  created_at: string;
+  updated_at: string;
+  vendor_name?: string;
+  template_title?: string;
+  answers: QuestionAnswerEntity[];
+}
+
+export interface AssignmentCreatePayload {
+  vendor_id: string;
+  template_id: string;
+  due_date?: string;
+  assigned_to_email?: string;
+  notes?: string;
+}
+
+export interface AnswerSubmissionPayload {
+  question_id: string;
+  response_value: string;
+  justification?: string;
+  evidence_reference?: string;
+}
+
+// Scaffolding types for remaining increments
 export interface VendorOverview {
   id: string;
   name: string;
