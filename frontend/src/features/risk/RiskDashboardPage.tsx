@@ -112,13 +112,13 @@ export const RiskDashboardPage: React.FC = () => {
   const getRiskBandBadge = (band: string) => {
     switch (band) {
       case 'critical':
-        return <Badge variant="danger">CRITICAL</Badge>;
+        return <Badge variant="danger" dot>CRITICAL</Badge>;
       case 'high':
-        return <Badge variant="warning">HIGH</Badge>;
+        return <Badge variant="warning" dot>HIGH</Badge>;
       case 'medium':
-        return <Badge variant="info">MEDIUM</Badge>;
+        return <Badge variant="info" dot>MEDIUM</Badge>;
       default:
-        return <Badge variant="success">LOW</Badge>;
+        return <Badge variant="success" dot>LOW</Badge>;
     }
   };
 
@@ -175,47 +175,53 @@ export const RiskDashboardPage: React.FC = () => {
       ) : (
         <div className="space-y-6">
           {/* Top Score Comparison Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-white border border-slate-200/80 rounded-xl p-4 shadow-sm">
-              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Inherent Risk Score</span>
-              <div className="mt-2 flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-slate-900">{riskScore.inherent_score}</span>
-                <span className="text-xs text-slate-400">/ 25</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-card hover:shadow-card-hover transition-all">
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Inherent Risk Score</span>
+              <div className="mt-2.5 flex items-baseline gap-2">
+                <span className="text-3xl font-extrabold text-slate-900 tracking-tight">{riskScore.inherent_score}</span>
+                <span className="text-xs font-semibold text-slate-400">/ 25</span>
                 {getRiskBandBadge(riskScore.inherent_band)}
               </div>
-              <span className="text-[11px] text-slate-400">Likelihood ({riskScore.likelihood}) × Impact ({riskScore.impact})</span>
+              <p className="mt-2 text-[11px] text-slate-500 pt-2 border-t border-slate-100">
+                Likelihood ({riskScore.likelihood}) × Impact ({riskScore.impact})
+              </p>
             </div>
 
-            <div className="bg-white border border-slate-200/80 rounded-xl p-4 shadow-sm">
-              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Validated Controls</span>
-              <div className="mt-2 flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-emerald-600">
+            <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-card hover:shadow-card-hover transition-all">
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Validated Controls</span>
+              <div className="mt-2.5 flex items-baseline gap-2">
+                <span className="text-3xl font-extrabold text-emerald-600 tracking-tight">
                   {Math.round(riskScore.control_effectiveness_score * 100)}%
                 </span>
-                <span className="text-xs text-slate-400">effectiveness</span>
+                <span className="text-xs font-semibold text-slate-400">effectiveness</span>
               </div>
-              <span className="text-[11px] text-slate-400">Substantiated via audited evidence</span>
+              <p className="mt-2 text-[11px] text-slate-500 pt-2 border-t border-slate-100">
+                Substantiated via audited evidence
+              </p>
             </div>
 
-            <div className="bg-white border border-slate-200/80 rounded-xl p-4 shadow-sm">
-              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Residual Risk Score</span>
-              <div className="mt-2 flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-brand-700">{riskScore.residual_score}</span>
-                <span className="text-xs text-slate-400">/ 25</span>
+            <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-card hover:shadow-card-hover transition-all">
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Residual Risk Score</span>
+              <div className="mt-2.5 flex items-baseline gap-2">
+                <span className="text-3xl font-extrabold text-brand-600 tracking-tight">{riskScore.residual_score}</span>
+                <span className="text-xs font-semibold text-slate-400">/ 25</span>
                 {getRiskBandBadge(riskScore.residual_band)}
               </div>
-              <span className="text-[11px] text-slate-400 flex items-center gap-1 text-emerald-600 font-medium">
+              <p className="mt-2 text-[11px] text-emerald-700 flex items-center gap-1 font-semibold pt-2 border-t border-slate-100">
                 <TrendingDown className="h-3.5 w-3.5" /> Post-mitigation exposure
-              </span>
+              </p>
             </div>
 
-            <div className="bg-white border border-slate-200/80 rounded-xl p-4 shadow-sm">
-              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Active Security Findings</span>
-              <div className="mt-2 flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-slate-900">{findings?.length || 0}</span>
-                <span className="text-xs text-slate-500">gaps identified</span>
+            <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-card hover:shadow-card-hover transition-all">
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Active Security Findings</span>
+              <div className="mt-2.5 flex items-baseline gap-2">
+                <span className="text-3xl font-extrabold text-slate-900 tracking-tight">{findings?.length || 0}</span>
+                <span className="text-xs font-medium text-slate-500">gaps identified</span>
               </div>
-              <span className="text-[11px] text-slate-400">Requiring corrective action plans</span>
+              <p className="mt-2 text-[11px] text-slate-500 pt-2 border-t border-slate-100">
+                Requiring corrective action plans
+              </p>
             </div>
           </div>
 
@@ -230,24 +236,24 @@ export const RiskDashboardPage: React.FC = () => {
           {/* 5x5 Heatmap Matrix & Comparison */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* 5x5 Risk Matrix */}
-            <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
-              <div className="flex items-center justify-between">
+            <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-card hover:shadow-card-hover transition-all space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                   <ShieldAlert className="h-4 w-4 text-brand-600" />
                   5 × 5 TPRM Heatmap Matrix
                 </h3>
-                <span className="text-xs text-slate-400">Likelihood vs. Impact</span>
+                <span className="text-xs font-medium text-slate-400">Likelihood vs. Impact</span>
               </div>
 
               {/* Matrix Grid */}
-              <div className="space-y-1">
-                <div className="text-[10px] font-semibold text-slate-400 text-center uppercase tracking-wider mb-2">
+              <div className="space-y-1.5 pt-1">
+                <div className="text-[10px] font-bold text-slate-400 text-center uppercase tracking-wider mb-2">
                   Likelihood (1 to 5)
                 </div>
                 {[5, 4, 3, 2, 1].map((rowLikelihood) => (
-                  <div key={rowLikelihood} className="flex items-center gap-1">
-                    <span className="w-5 text-right font-mono text-xs text-slate-400">{rowLikelihood}</span>
-                    <div className="grid grid-cols-5 gap-1 flex-1">
+                  <div key={rowLikelihood} className="flex items-center gap-1.5">
+                    <span className="w-5 text-right font-mono text-xs font-semibold text-slate-400">{rowLikelihood}</span>
+                    <div className="grid grid-cols-5 gap-1.5 flex-1">
                       {[1, 2, 3, 4, 5].map((colImpact) => {
                         const cellScore = rowLikelihood * colImpact;
                         const isInherent = riskScore.likelihood === rowLikelihood && riskScore.impact === colImpact;
@@ -257,20 +263,20 @@ export const RiskDashboardPage: React.FC = () => {
                           Math.round(riskScore.residual_score / riskScore.impact) === rowLikelihood &&
                           riskScore.impact === colImpact;
 
-                        let bgClass = 'bg-emerald-50 text-emerald-800 border-emerald-200';
-                        if (cellScore >= 16) bgClass = 'bg-rose-50 text-rose-800 border-rose-200';
-                        else if (cellScore >= 10) bgClass = 'bg-amber-50 text-amber-800 border-amber-200';
-                        else if (cellScore >= 5) bgClass = 'bg-blue-50 text-blue-800 border-blue-200';
+                        let bgClass = 'bg-emerald-50/80 text-emerald-800 border-emerald-200/90 hover:bg-emerald-100/80';
+                        if (cellScore >= 16) bgClass = 'bg-rose-50/80 text-rose-800 border-rose-200/90 hover:bg-rose-100/80';
+                        else if (cellScore >= 10) bgClass = 'bg-amber-50/80 text-amber-800 border-amber-200/90 hover:bg-amber-100/80';
+                        else if (cellScore >= 5) bgClass = 'bg-sky-50/80 text-sky-800 border-sky-200/90 hover:bg-sky-100/80';
 
                         return (
                           <div
                             key={colImpact}
-                            className={`h-11 rounded-lg border flex flex-col items-center justify-center text-xs font-mono font-semibold relative transition-all ${bgClass}`}
+                            className={`h-11 rounded-lg border flex flex-col items-center justify-center text-xs font-mono font-bold relative transition-all shadow-subtle ${bgClass}`}
                           >
                             <span>{cellScore}</span>
                             {isInherent && (
                               <span
-                                className="absolute -top-1.5 -left-1.5 px-1.5 py-0.2 bg-red-600 text-white rounded-full text-[9px] font-sans font-bold shadow"
+                                className="absolute -top-1.5 -left-1.5 px-1.5 py-0.5 bg-rose-600 text-white rounded-md text-[9px] font-sans font-bold shadow-sm ring-1 ring-white"
                                 title="Inherent Risk Position"
                               >
                                 INH
@@ -278,7 +284,7 @@ export const RiskDashboardPage: React.FC = () => {
                             )}
                             {isResidual && (
                               <span
-                                className="absolute -bottom-1.5 -right-1.5 px-1.5 py-0.2 bg-brand-600 text-white rounded-full text-[9px] font-sans font-bold shadow"
+                                className="absolute -bottom-1.5 -right-1.5 px-1.5 py-0.5 bg-brand-600 text-white rounded-md text-[9px] font-sans font-bold shadow-sm ring-1 ring-white"
                                 title="Residual Risk Position"
                               >
                                 RES
@@ -290,69 +296,74 @@ export const RiskDashboardPage: React.FC = () => {
                     </div>
                   </div>
                 ))}
-                <div className="flex items-center pl-6 pt-1 text-[10px] font-semibold text-slate-400 justify-between uppercase tracking-wider">
+                <div className="flex items-center pl-6 pt-2 text-[10px] font-bold text-slate-400 justify-between uppercase tracking-wider">
                   <span>Impact: 1 (Public)</span>
                   <span>Impact: 3 (Confidential)</span>
-                  <span>Impact: 5 (Restricted/Admin)</span>
+                  <span>Impact: 5 (Restricted)</span>
                 </div>
               </div>
 
-              <div className="flex items-center justify-center gap-4 pt-2 text-xs text-slate-500">
+              <div className="flex items-center justify-center gap-4 pt-3 border-t border-slate-100 text-xs text-slate-600 font-medium">
                 <span className="flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500" /> Low (1-4)
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-emerald-200" /> Low (1-4)
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-blue-500" /> Medium (5-9)
+                  <span className="h-2 w-2 rounded-full bg-sky-500 ring-2 ring-sky-200" /> Medium (5-9)
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-amber-500" /> High (10-15)
+                  <span className="h-2 w-2 rounded-full bg-amber-500 ring-2 ring-amber-200" /> High (10-15)
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-rose-500" /> Critical (16-25)
+                  <span className="h-2 w-2 rounded-full bg-rose-500 ring-2 ring-rose-200" /> Critical (16-25)
                 </span>
               </div>
             </div>
 
             {/* Inherent vs Residual Delta Visualization */}
-            <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-5">
-              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                <TrendingDown className="h-4 w-4 text-emerald-600" />
-                Inherent vs. Residual Risk Reduction
-              </h3>
+            <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-card hover:shadow-card-hover transition-all space-y-5">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <TrendingDown className="h-4 w-4 text-emerald-600" />
+                  Inherent vs. Residual Risk Reduction
+                </h3>
+                <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/80">
+                  Control Mitigation Active
+                </span>
+              </div>
 
               <div className="space-y-4">
                 <div>
-                  <div className="flex justify-between text-xs mb-1 font-semibold">
+                  <div className="flex justify-between text-xs mb-1.5 font-bold">
                     <span className="text-slate-700">Inherent Risk (Raw Threat & Connectivity)</span>
                     <span className="font-mono text-slate-900">{riskScore.inherent_score} / 25</span>
                   </div>
-                  <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                  <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden shadow-inner">
                     <div
-                      className="bg-red-500 h-3 rounded-full"
+                      className="bg-rose-500 h-2.5 rounded-full transition-all duration-500"
                       style={{ width: `${(riskScore.inherent_score / 25) * 100}%` }}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <div className="flex justify-between text-xs mb-1 font-semibold">
+                  <div className="flex justify-between text-xs mb-1.5 font-bold">
                     <span className="text-slate-700">Residual Risk (After Validated Controls)</span>
-                    <span className="font-mono text-brand-700">{riskScore.residual_score} / 25</span>
+                    <span className="font-mono text-brand-600">{riskScore.residual_score} / 25</span>
                   </div>
-                  <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                  <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden shadow-inner">
                     <div
-                      className="bg-brand-600 h-3 rounded-full"
+                      className="bg-brand-600 h-2.5 rounded-full transition-all duration-500"
                       style={{ width: `${(riskScore.residual_score / 25) * 100}%` }}
                     />
                   </div>
                 </div>
 
-                <div className="p-3 bg-slate-50 rounded-lg text-xs space-y-2">
-                  <div className="font-semibold text-slate-800">Reduction Mechanics:</div>
+                <div className="p-3.5 bg-slate-50/80 rounded-xl border border-slate-200/80 text-xs space-y-2">
+                  <div className="font-bold text-slate-800">Reduction Mechanics:</div>
                   <p className="text-slate-600 leading-relaxed">
                     By verifying controls ({Math.round(riskScore.control_effectiveness_score * 100)}% effectiveness),
                     the residual exposure was reduced by{' '}
-                    <span className="font-bold text-emerald-600">
+                    <span className="font-bold text-emerald-700">
                       {Math.max(0, riskScore.inherent_score - riskScore.residual_score)} points
                     </span>
                     .

@@ -11,14 +11,14 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', isLoading = false, leftIcon, rightIcon, children, disabled, ...props }, ref) => {
-    const baseStyles = 'inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none rounded-md select-none';
+    const baseStyles = 'inline-flex items-center justify-center font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none rounded-lg select-none active:scale-[0.98]';
 
     const variants = {
-      primary: 'bg-slate-900 text-white hover:bg-slate-800 active:bg-slate-950 shadow-sm border border-slate-900',
-      secondary: 'bg-brand-50 text-brand-700 hover:bg-brand-100 border border-brand-200/60 shadow-sm',
-      outline: 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900 shadow-sm',
-      ghost: 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
-      danger: 'bg-red-600 text-white hover:bg-red-700 active:bg-red-800 shadow-sm',
+      primary: 'bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800 shadow-sm border border-brand-700/80 hover:shadow-glow-brand/30',
+      secondary: 'bg-brand-50 text-brand-700 hover:bg-brand-100/90 active:bg-brand-200/80 border border-brand-200/80 shadow-subtle',
+      outline: 'border border-slate-200/90 bg-white text-slate-700 hover:bg-slate-50/90 hover:text-slate-900 hover:border-slate-300 shadow-subtle',
+      ghost: 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900',
+      danger: 'bg-rose-600 text-white hover:bg-rose-700 active:bg-rose-800 shadow-sm border border-rose-700/80 hover:shadow-glow-danger/30',
     };
 
     const sizes = {
@@ -50,4 +50,3 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 
 Button.displayName = 'Button';
-
