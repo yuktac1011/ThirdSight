@@ -2,7 +2,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'cyber';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
   leftIcon?: React.ReactNode;
@@ -11,14 +11,15 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', isLoading = false, leftIcon, rightIcon, children, disabled, ...props }, ref) => {
-    const baseStyles = 'inline-flex items-center justify-center font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none rounded-lg select-none active:scale-[0.98]';
+    const baseStyles = 'inline-flex items-center justify-center font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 disabled:opacity-50 disabled:pointer-events-none rounded-xl select-none active:scale-[0.98]';
 
     const variants = {
-      primary: 'bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800 shadow-sm border border-brand-700/80 hover:shadow-glow-brand/30',
-      secondary: 'bg-brand-50 text-brand-700 hover:bg-brand-100/90 active:bg-brand-200/80 border border-brand-200/80 shadow-subtle',
-      outline: 'border border-slate-200/90 bg-white text-slate-700 hover:bg-slate-50/90 hover:text-slate-900 hover:border-slate-300 shadow-subtle',
-      ghost: 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900',
-      danger: 'bg-rose-600 text-white hover:bg-rose-700 active:bg-rose-800 shadow-sm border border-rose-700/80 hover:shadow-glow-danger/30',
+      primary: 'bg-gradient-to-r from-brand-600 via-indigo-600 to-brand-500 text-white shadow-glow-brand/50 hover:shadow-glow-brand hover:brightness-110 border border-brand-400/40',
+      cyber: 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-glow-cyan/50 hover:shadow-glow-cyan hover:brightness-110 border border-cyan-400/40',
+      secondary: 'bg-slate-800/90 text-slate-200 hover:bg-slate-700/90 active:bg-slate-800 border border-slate-700/80 shadow-subtle',
+      outline: 'border border-slate-700/80 bg-slate-900/60 backdrop-blur-md text-slate-200 hover:bg-slate-800 hover:text-white hover:border-slate-600 shadow-subtle',
+      ghost: 'text-slate-400 hover:bg-slate-800/80 hover:text-white',
+      danger: 'bg-gradient-to-r from-rose-600 to-red-600 text-white shadow-glow-danger/40 hover:shadow-glow-danger hover:brightness-110 border border-rose-500/40',
     };
 
     const sizes = {
