@@ -12,9 +12,12 @@ export const LoadingState: React.FC<LoadingStateProps> = ({
   message = 'Loading data...',
   className,
 }) => (
-  <div className={cn('flex flex-col items-center justify-center p-8 text-center', className)}>
-    <Loader2 className="h-7 w-7 animate-spin text-brand-600 mb-3" />
-    <p className="text-sm font-medium text-slate-500">{message}</p>
+  <div className={cn('flex flex-col items-center justify-center p-12 text-center', className)}>
+    <div className="relative flex items-center justify-center mb-4">
+      <div className="absolute h-10 w-10 rounded-full bg-cyan-500/20 blur-md animate-pulse" />
+      <Loader2 className="h-8 w-8 animate-spin text-cyan-400" />
+    </div>
+    <p className="text-sm font-semibold text-slate-300">{message}</p>
   </div>
 );
 
@@ -35,12 +38,12 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   icon,
   className,
 }) => (
-  <div className={cn('flex flex-col items-center justify-center p-8 text-center border border-dashed border-slate-300 rounded-lg bg-slate-50/50', className)}>
-    <div className="rounded-full bg-slate-100 p-3 text-slate-400 mb-3">
+  <div className={cn('flex flex-col items-center justify-center p-10 text-center border border-dashed border-slate-800 rounded-2xl bg-slate-900/50 backdrop-blur-md', className)}>
+    <div className="rounded-2xl bg-slate-800/80 p-3.5 text-slate-400 mb-3 border border-slate-700/80 shadow-subtle">
       {icon || <Inbox className="h-6 w-6" />}
     </div>
-    <h3 className="text-sm font-semibold text-slate-900 mb-1">{title}</h3>
-    <p className="text-xs text-slate-500 max-w-sm mb-4">{description}</p>
+    <h3 className="text-sm font-bold text-white mb-1">{title}</h3>
+    <p className="text-xs text-slate-400 max-w-sm mb-4 leading-relaxed">{description}</p>
     {actionLabel && onAction && (
       <Button variant="outline" size="sm" onClick={onAction}>
         {actionLabel}
@@ -51,28 +54,32 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 
 export interface ErrorStateProps {
   title?: string;
-  message?: string;
+  message: string;
+  retry?: () => void;
   onRetry?: () => void;
   className?: string;
 }
 
 export const ErrorState: React.FC<ErrorStateProps> = ({
   title = 'Something went wrong',
-  message = 'An unexpected error occurred while loading this view.',
+  message,
+  retry,
   onRetry,
   className,
-}) => (
-  <div className={cn('flex flex-col items-center justify-center p-8 text-center border border-rose-200 rounded-lg bg-rose-50/30', className)}>
-    <div className="rounded-full bg-rose-100 p-3 text-rose-600 mb-3">
-      <AlertCircle className="h-6 w-6" />
+}) => {
+  const handleRetry = retry || onRetry;
+  return (
+    <div className={cn('flex flex-col items-center justify-center p-8 text-center border border-rose-500/30 rounded-2xl bg-rose-950/20 backdrop-blur-md', className)}>
+      <div className="rounded-2xl bg-rose-950/50 border border-rose-500/40 p-3 text-rose-400 mb-3 shadow-[0_0_15px_rgba(244,63,94,0.2)]">
+        <AlertCircle className="h-6 w-6" />
+      </div>
+      <h3 className="text-sm font-bold text-rose-200 mb-1">{title}</h3>
+      <p className="text-xs text-rose-300/80 max-w-sm mb-4">{message}</p>
+      {handleRetry && (
+        <Button variant="danger" size="sm" onClick={handleRetry}>
+          Retry Action
+        </Button>
+      )}
     </div>
-    <h3 className="text-sm font-semibold text-slate-900 mb-1">{title}</h3>
-    <p className="text-xs text-slate-600 max-w-md mb-4">{message}</p>
-    {onRetry && (
-      <Button variant="outline" size="sm" onClick={onRetry}>
-        Try Again
-      </Button>
-    )}
-  </div>
-);
-
+  );
+};

@@ -15,13 +15,13 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="w-full space-y-1.5">
         {label && (
-          <label htmlFor={generatedId} className="block text-xs font-semibold uppercase tracking-wider text-slate-700">
+          <label htmlFor={generatedId} className="block text-xs font-bold uppercase tracking-wider text-slate-300">
             {label}
           </label>
         )}
-        <div className="relative rounded-md shadow-subtle">
+        <div className="relative rounded-xl shadow-subtle">
           {leftIcon && (
-            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
               {leftIcon}
             </div>
           )}
@@ -29,20 +29,20 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             id={generatedId}
             ref={ref}
             className={cn(
-              'block w-full rounded-md border border-slate-300 bg-white py-1.5 text-sm text-slate-900 placeholder:text-slate-400 transition-colors',
-              'focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500',
-              'disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500',
-              leftIcon ? 'pl-9 pr-3' : 'px-3',
-              error && 'border-rose-300 text-rose-900 focus:border-rose-500 focus:ring-rose-500',
+              'block w-full rounded-xl border border-slate-800 bg-slate-900/80 backdrop-blur-md py-2 text-sm text-white placeholder:text-slate-500 transition-all',
+              'focus:border-brand-500 focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/30',
+              'disabled:cursor-not-allowed disabled:bg-slate-950 disabled:text-slate-600',
+              leftIcon ? 'pl-10 pr-3.5' : 'px-3.5',
+              error && 'border-rose-500/60 text-rose-300 focus:border-rose-500 focus:ring-rose-500/30',
               className
             )}
             {...props}
           />
         </div>
         {error ? (
-          <p className="text-xs text-rose-600 font-medium">{error}</p>
+          <p className="text-xs text-rose-400 font-medium">{error}</p>
         ) : helperText ? (
-          <p className="text-xs text-slate-500">{helperText}</p>
+          <p className="text-xs text-slate-400">{helperText}</p>
         ) : null}
       </div>
     );
@@ -50,4 +50,3 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 );
 
 Input.displayName = 'Input';
-
