@@ -1,8 +1,8 @@
 <div align="center">
 
-# 🛡️ ThirdSight (TPRM)
+<img src="docs/assets/hero-banner.svg" alt="ThirdSight TPRM Platform Banner" width="100%"/>
 
-### *Enterprise Third-Party Security Intelligence & Automated Vendor Risk Quantification*
+<br/><br/>
 
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.111.0-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![React](https://img.shields.io/badge/React-18.3.1-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org)
@@ -18,39 +18,7 @@
   <b>ThirdSight</b> is a defense-in-depth <b>Third-Party Risk Management (TPRM)</b> platform designed to automate vendor security assessments, validate evidence artifacts, calculate deterministic 5×5 risk heatmaps, track gap remediation lifecycles, and generate cryptographically signed executive audit reports.
 </p>
 
-[Explore Key Features](#-key-capabilities) • [System Architecture](#-system-architecture) • [Getting Started](#-quick-start) • [Risk Engine](#-deterministic-risk-quantification) • [Security](#-security-controls--defense-in-depth)
-
-<br/>
-
-```
-+-------------------------------------------------------------------------------------------------+
-|                                 THIRDSIGHT ENTERPRISE TOPOLOGY                                  |
-|                                                                                                 |
-|   [ SecOps Analyst ]       [ Vendor Respondent ]       [ Security Auditor ]                     |
-|           │                         │                           │                               |
-|           └─────────────────────────┼───────────────────────────┘                               |
-|                                     ▼                                                           |
-|                  ┌─────────────────────────────────────┐                                        |
-|                  │  Vite + React 18 Cyber UI Console   │ (Tailwind + Lucide + Query)            |
-|                  └──────────────────┬──────────────────┘                                        |
-|                                     │ HTTPS / JWT Auth                                          |
-|                                     ▼                                                           |
-|                  ┌─────────────────────────────────────┐                                        |
-|                  │    FastAPI Application Gateway      │ (Strict RBAC + IDOR Tenant Isolation)  |
-|                  └──────┬───────────┬───────────┬──────┘                                        |
-|                         │           │           │                                               |
-|      ┌──────────────────┴──┐ ┌──────┴──────┐ ┌──┴──────────────────┐                            |
-|      │  Evidence Pipeline  │ │ Risk Engine │ │ AI Intel Assistant  │                            |
-|      │ (Magic Byte & Hash) │ │  (5x5 Matrix)│ │ (Prompt Injection  │                            |
-|      └──────────┬──────────┘ └──────┬──────┘ │    Defense Shield)  │                            |
-|                 │                   │        └──┬──────────────────┘                            |
-|                 ▼                   ▼           ▼                                               |
-|      ┌─────────────────────┐ ┌─────────────────────────────────────┐                            |
-|      │  MinIO / S3 Vault   │ │      PostgreSQL / SQLite DB         │                            |
-|      │ (Isolated ClamAV)   │ │  (Tamper-Proof Audit Logging)       │                            |
-|      └─────────────────────┘ └─────────────────────────────────────┘                            |
-+-------------------------------------------------------------------------------------------------+
-```
+[Key Capabilities](#-key-capabilities) • [Pipeline Workflow](#-end-to-end-vendor-assessment-pipeline) • [Risk Heatmap](#-deterministic-5x5-risk-quantification) • [Architecture](#-system-architecture) • [Quick Start](#-quick-start) • [Security](#-security-controls--defense-in-depth)
 
 </div>
 
@@ -58,47 +26,97 @@
 
 ## ⚡ Key Capabilities
 
-### 🏢 Multi-Tenant Vendor Inventory & Tiering
-- Dynamic vendor registry categorized by business criticality (**Tier 1 Mission-Critical**, **Tier 2 High**, **Tier 3 Medium/Low**).
-- Automated tracking of security posture scores, compliance certifications (SOC 2, ISO 27001, HIPAA), and assessment due dates.
-- Granular data classification tracking: Public, Internal, Confidential, and Restricted.
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>🏢 Vendor Inventory & Tiering</h3>
+      <ul>
+        <li>Dynamic multi-tenant supplier directory with automated tiering (<b>Tier 1 Mission-Critical</b>, <b>Tier 2 High</b>, <b>Tier 3 Medium/Low</b>).</li>
+        <li>Granular data classification tracking: <code>Public</code>, <code>Internal</code>, <code>Confidential</code>, and <code>Restricted</code>.</li>
+        <li>Continuous monitoring of vendor posture scores and active questionnaires.</li>
+      </ul>
+    </td>
+    <td width="50%" valign="top">
+      <h3>📋 Questionnaire Engine & Locking</h3>
+      <ul>
+        <li>Version-controlled questionnaire authoring (<b>SIG Lite 2026</b>, <b>NIST CSF 2.0</b>, <b>ISO 27001</b>).</li>
+        <li>Mandatory justification rules requiring detailed rationale for <code>N/A</code> and <code>Partial</code> responses.</li>
+        <li>Automated submission state locks preventing tamper once submitted for SecOps review.</li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>🛡️ Evidence Vault & Quarantine</h3>
+      <ul>
+        <li>Secure upload pipeline with <b>magic-byte format verification</b> preventing MIME spoofing attacks.</li>
+        <li>SHA-256 integrity hashing and ClamAV quarantine isolation.</li>
+        <li>Audit review workflows with approval, rejection reasons, and expiration tracking.</li>
+      </ul>
+    </td>
+    <td width="50%" valign="top">
+      <h3>🤖 Human-in-the-Loop AI Intelligence</h3>
+      <ul>
+        <li>Automated policy extraction, document summarization, and control mapping suggestions.</li>
+        <li><b>Built-in Prompt Injection Defense Shield</b> cleanses untrusted vendor artifacts before model inference.</li>
+        <li>Strict advisory role: AI never approves vendors or accepts risk autonomously.</li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>📊 Deterministic 5×5 Risk Engine</h3>
+      <ul>
+        <li>Mathematical formula coupling raw vendor exposure with audited control effectiveness.</li>
+        <li>Visual <b>5×5 Likelihood vs. Impact Heatmap</b> with pin markers for Inherent (<code>INH</code>) and Residual (<code>RES</code>) states.</li>
+        <li>Automatic security gap findings generation with remediation action plans.</li>
+      </ul>
+    </td>
+    <td width="50%" valign="top">
+      <h3>📑 Cryptographic Audit Reports</h3>
+      <ul>
+        <li>On-demand dual PDF reports: <b>Executive Scorecard</b> and <b>Technical Audit Dossier</b>.</li>
+        <li>Cryptographic SHA-256 integrity stamp ensuring tamper-proof report verification.</li>
+        <li>Continuous monitoring alerts, reassessment reminders, and CSV audit event exports.</li>
+      </ul>
+    </td>
+  </tr>
+</table>
 
-### 📋 Questionnaire Engine & Assessment Lifecycle
-- Version-controlled questionnaire builder supporting **SIG Lite 2026**, **NIST CSF 2.0**, and custom questionnaires.
-- Mandatory justification rules when vendors respond `N/A` or `Partial`.
-- Full assessment workflow: `INITIATED` ➔ `ASSIGNED` ➔ `IN_PROGRESS` ➔ `SUBMITTED` ➔ `UNDER_REVIEW` ➔ `COMPLETED` / `REOPENED`.
-- State-machine locking that freezes answers upon vendor submission until explicit analyst reopening.
+---
 
-### 🛡️ Evidence Vault & Malware Quarantine Pipeline
-- Multi-stage document collection supporting PDF, DOCX, XLSX, and CSV evidence.
-- Anti-tampering file processing:
-  - **File signature verification** using magic bytes (prevents MIME type spoofing).
-  - **SHA-256 integrity digest** generated for every ingested file.
-  - **Quarantine directory isolation** preventing uninspected files from executing.
-  - Safe inline previews, analyst approval/rejection workflows with auditable commentary.
+## 🔄 End-to-End Vendor Assessment Pipeline
 
-### 📊 Deterministic Risk Engine & 5×5 Heatmap
-- Explainable, mathematical inherent and residual risk calculations.
-- Control effectiveness integration:
-  $$\text{Residual Risk} = \text{Inherent Risk} \times (1 - \text{Validated Control Effectiveness})$$
-- Interactive **5×5 Likelihood vs. Impact Heatmap** visually comparing:
-  - 🔴 **Inherent Risk Position (`INH`)**
-  - 🔵 **Residual Risk Position (`RES`)**
-- Automated gap discovery triggering prioritized remediation action plans with owner assignments and SLA tracking.
+The entire vendor evaluation workflow follows a structured zero-trust lifecycle:
 
-### 🤖 Human-in-the-Loop AI Evidence Assistant
-- AI provider abstraction (Gemini / Anthropic / OpenAI / Mock).
-- Automated summarization of lengthy compliance documents and policy PDFs.
-- Automatic control classification and evidence-to-control mapping suggestions.
-- **Built-in Prompt Injection Defense Shield**: cleanses documents of adversarial prompts and exfiltration scripts before model inference.
-- **Strict Human Approval Enforcement**: AI acts purely in an advisory capacity; analysts maintain 100% final authority.
+<div align="center">
+  <img src="docs/assets/pipeline-flow.svg" alt="ThirdSight Pipeline Workflow" width="100%"/>
+</div>
 
-### 📑 Cryptographic Reporting & Continuous Monitoring
-- On-demand PDF generation with dual report templates:
-  - **Executive Summary**: High-level risk scorecards, posture breakdown, and compliance health.
-  - **Technical Audit Dossier**: Exhaustive questionnaire answers, control mappings, evidence citations, and remediation milestones.
-- SHA-256 report verification stamps guaranteeing audit immutability.
-- Event telemetry, automated reassessment notifications, evidence expiration alerts, and CSV audit trail export.
+---
+
+## 📊 Deterministic 5×5 Risk Quantification
+
+ThirdSight strictly prohibits numerical hallucination. Risk calculations are completely explainable, auditable, and mathematically reproducible:
+
+<div align="center">
+  <img src="docs/assets/risk-matrix.svg" alt="ThirdSight 5x5 Risk Heatmap Matrix" width="100%"/>
+</div>
+
+### Risk Reduction Formula
+$$\text{Inherent Risk} = \text{Likelihood} \times \text{Impact} \quad (1 \le \text{Score} \le 25)$$
+
+$$\text{Control Effectiveness} = \frac{\sum (\text{Validated Control Weights})}{\text{Total Applicable Weights}} \quad (0.0 \le \text{Eff} \le 1.0)$$
+
+$$\text{Residual Risk} = \text{Round}\left(\text{Inherent Risk} \times (1 - \text{Control Effectiveness})\right)$$
+
+### 5×5 Risk Severity Bands
+| Score Range | Severity Band | Response SLA | Remediation Requirement |
+| :---: | :---: | :---: | :---: |
+| **16 – 25** | 🔴 **CRITICAL** | 24 Hours | Immediate CISO-level remediation plan required |
+| **10 – 15** | 🟠 **HIGH** | 7 Days | Corrective action plan with monthly progress audits |
+| **5 – 9** | 🟡 **MEDIUM** | 30 Days | Compensating control implementation |
+| **1 – 4** | 🟢 **LOW** | 90 Days | Accepted operational posture; monitored annually |
 
 ---
 
@@ -106,7 +124,7 @@
 
 ```mermaid
 graph TD
-    subgraph Frontend ["Cyber UI Console (Vite + React 18)"]
+    subgraph Client ["Cyber Command Console (Vite + React 18)"]
         UI_Dash["Overview Dashboard"]
         UI_Vendors["Vendor Management"]
         UI_Portal["Respondent Portal"]
@@ -160,7 +178,7 @@ graph TD
 
 ## 🎨 Design System: Cyber Command Aesthetic
 
-ThirdSight features a sleek, high-contrast **Cyber Command Center** interface crafted with Tailwind CSS and glassmorphism accents:
+ThirdSight features a high-contrast **Cyber Command Center** interface crafted with Tailwind CSS and glassmorphism accents:
 
 | Token | Class | Semantic Purpose |
 | :--- | :--- | :--- |
@@ -233,26 +251,6 @@ pytest tests -v
 - `test_reports_and_monitoring.py`: PDF generation stream, SHA-256 hashes, audit exports.
 - `test_risk_and_ai.py`: Formula reproducibility, residual risk calculations, prompt injection defense.
 - `test_vendors.py`: Multi-tenant vendor isolation, duplicate prevention, IDOR guards.
-
----
-
-## 📊 Deterministic Risk Quantification
-
-ThirdSight strictly prohibits numerical hallucination. Risk calculations are completely explainable and mathematically reproducible:
-
-$$\text{Inherent Score} = \text{Likelihood} \times \text{Impact} \quad (1 \le \text{Score} \le 25)$$
-
-$$\text{Control Effectiveness} = \frac{\sum (\text{Validated Control Weights})}{\text{Total Applicable Weights}} \quad (0.0 \le \text{Eff} \le 1.0)$$
-
-$$\text{Residual Score} = \text{Round}\left(\text{Inherent Score} \times (1 - \text{Control Effectiveness})\right)$$
-
-### 5×5 Risk Severity Bands
-| Score Range | Severity Band | Response SLA | Remediation Requirement |
-| :---: | :---: | :---: | :---: |
-| **16 – 25** | 🔴 **CRITICAL** | 24 Hours | Immediate CISO-level remediation plan required |
-| **10 – 15** | 🟠 **HIGH** | 7 Days | Corrective action plan with monthly progress audits |
-| **5 – 9** | 🟡 **MEDIUM** | 30 Days | Compensating control implementation |
-| **1 – 4** | 🟢 **LOW** | 90 Days | Accepted operational posture; monitored annually |
 
 ---
 

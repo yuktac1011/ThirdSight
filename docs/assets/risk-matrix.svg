@@ -1,0 +1,199 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 950 480" width="100%" height="100%">
+  <defs>
+    <linearGradient id="matrixBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#020617"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+
+    <!-- Cell Gradients -->
+    <linearGradient id="cellLow" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#064e3b" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#022c22" stop-opacity="0.8"/>
+    </linearGradient>
+    <linearGradient id="cellMed" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0e7490" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#083344" stop-opacity="0.8"/>
+    </linearGradient>
+    <linearGradient id="cellHigh" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#b45309" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#451a03" stop-opacity="0.85"/>
+    </linearGradient>
+    <linearGradient id="cellCrit" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#be123c" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#4c0519" stop-opacity="0.9"/>
+    </linearGradient>
+
+    <filter id="glowBadge">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <style>
+    .font-matrix-title { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 16px; font-weight: 800; fill: #ffffff; }
+    .font-cell-score { font-family: 'JetBrains Mono', Consolas, monospace; font-size: 16px; font-weight: 800; }
+    .font-label { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 11px; font-weight: 700; fill: #64748b; }
+    .font-desc { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 12px; fill: #94a3b8; }
+  </style>
+
+  <rect width="950" height="480" rx="16" fill="url(#matrixBg)" stroke="#1e293b" stroke-width="1.5"/>
+
+  <!-- Matrix Header -->
+  <text x="40" y="42" class="font-matrix-title">5 × 5 DETERMINISTIC TPRM RISK HEATMAP MATRIX</text>
+  <text x="40" y="62" class="font-desc">
+    Calculates inherent vs. residual exposure with validated control reduction mechanics: Residual = Inherent × (1 - Effectiveness)
+  </text>
+
+  <!-- Left Y-Axis (Likelihood) -->
+  <g transform="translate(45, 80)">
+    <text x="-10" y="160" transform="rotate(-90, -10, 160)" class="font-label" text-anchor="middle" letter-spacing="2">
+      LIKELIHOOD (PROBABILITY 1 TO 5)
+    </text>
+    
+    <text x="45" y="40" class="font-cell-score" fill="#94a3b8">5</text>
+    <text x="45" y="98" class="font-cell-score" fill="#94a3b8">4</text>
+    <text x="45" y="156" class="font-cell-score" fill="#94a3b8">3</text>
+    <text x="45" y="214" class="font-cell-score" fill="#94a3b8">2</text>
+    <text x="45" y="272" class="font-cell-score" fill="#94a3b8">1</text>
+  </g>
+
+  <!-- 5x5 Grid Cells -->
+  <g transform="translate(115, 85)">
+    <!-- Row 5 (Likelihood = 5) -->
+    <rect x="0" y="0" width="70" height="50" rx="8" fill="url(#cellMed)" stroke="#0e7490"/>
+    <text x="35" y="32" class="font-cell-score" fill="#38bdf8" text-anchor="middle">5</text>
+
+    <rect x="78" y="0" width="70" height="50" rx="8" fill="url(#cellHigh)" stroke="#b45309"/>
+    <text x="113" y="32" class="font-cell-score" fill="#f59e0b" text-anchor="middle">10</text>
+
+    <rect x="156" y="0" width="70" height="50" rx="8" fill="url(#cellHigh)" stroke="#b45309"/>
+    <text x="191" y="32" class="font-cell-score" fill="#f59e0b" text-anchor="middle">15</text>
+
+    <!-- INHERENT PIN: (Likelihood=5, Impact=4 => Score=20) -->
+    <rect x="234" y="0" width="70" height="50" rx="8" fill="url(#cellCrit)" stroke="#be123c"/>
+    <text x="269" y="32" class="font-cell-score" fill="#fb7185" text-anchor="middle">20</text>
+    <!-- Inherent Tag -->
+    <g transform="translate(230, -8)" filter="url(#glowBadge)">
+      <rect width="36" height="18" rx="5" fill="#e11d48"/>
+      <text x="18" y="13" fill="#ffffff" font-family="sans-serif" font-size="9" font-weight="900" text-anchor="middle">INH</text>
+    </g>
+
+    <rect x="312" y="0" width="70" height="50" rx="8" fill="url(#cellCrit)" stroke="#be123c"/>
+    <text x="347" y="32" class="font-cell-score" fill="#fb7185" text-anchor="middle">25</text>
+
+    <!-- Row 4 (Likelihood = 4) -->
+    <rect x="0" y="58" width="70" height="50" rx="8" fill="url(#cellLow)" stroke="#059669"/>
+    <text x="35" y="90" class="font-cell-score" fill="#34d399" text-anchor="middle">4</text>
+
+    <rect x="78" y="58" width="70" height="50" rx="8" fill="url(#cellMed)" stroke="#0e7490"/>
+    <text x="113" y="90" class="font-cell-score" fill="#38bdf8" text-anchor="middle">8</text>
+
+    <rect x="156" y="58" width="70" height="50" rx="8" fill="url(#cellHigh)" stroke="#b45309"/>
+    <text x="191" y="90" class="font-cell-score" fill="#f59e0b" text-anchor="middle">12</text>
+
+    <rect x="234" y="58" width="70" height="50" rx="8" fill="url(#cellCrit)" stroke="#be123c"/>
+    <text x="269" y="90" class="font-cell-score" fill="#fb7185" text-anchor="middle">16</text>
+
+    <rect x="312" y="58" width="70" height="50" rx="8" fill="url(#cellCrit)" stroke="#be123c"/>
+    <text x="347" y="90" class="font-cell-score" fill="#fb7185" text-anchor="middle">20</text>
+
+    <!-- Row 3 (Likelihood = 3) -->
+    <rect x="0" y="116" width="70" height="50" rx="8" fill="url(#cellLow)" stroke="#059669"/>
+    <text x="35" y="148" class="font-cell-score" fill="#34d399" text-anchor="middle">3</text>
+
+    <rect x="78" y="116" width="70" height="50" rx="8" fill="url(#cellMed)" stroke="#0e7490"/>
+    <text x="113" y="148" class="font-cell-score" fill="#38bdf8" text-anchor="middle">6</text>
+
+    <rect x="156" y="116" width="70" height="50" rx="8" fill="url(#cellMed)" stroke="#0e7490"/>
+    <text x="191" y="148" class="font-cell-score" fill="#38bdf8" text-anchor="middle">9</text>
+
+    <rect x="234" y="116" width="70" height="50" rx="8" fill="url(#cellHigh)" stroke="#b45309"/>
+    <text x="269" y="148" class="font-cell-score" fill="#f59e0b" text-anchor="middle">12</text>
+
+    <rect x="312" y="116" width="70" height="50" rx="8" fill="url(#cellHigh)" stroke="#b45309"/>
+    <text x="347" y="148" class="font-cell-score" fill="#f59e0b" text-anchor="middle">15</text>
+
+    <!-- Row 2 (Likelihood = 2) -->
+    <rect x="0" y="174" width="70" height="50" rx="8" fill="url(#cellLow)" stroke="#059669"/>
+    <text x="35" y="206" class="font-cell-score" fill="#34d399" text-anchor="middle">2</text>
+
+    <rect x="78" y="174" width="70" height="50" rx="8" fill="url(#cellLow)" stroke="#059669"/>
+    <text x="113" y="206" class="font-cell-score" fill="#34d399" text-anchor="middle">4</text>
+
+    <rect x="156" y="174" width="70" height="50" rx="8" fill="url(#cellMed)" stroke="#0e7490"/>
+    <text x="191" y="206" class="font-cell-score" fill="#38bdf8" text-anchor="middle">6</text>
+
+    <!-- RESIDUAL PIN: (Likelihood=2, Impact=4 => Score=8) -->
+    <rect x="234" y="174" width="70" height="50" rx="8" fill="url(#cellMed)" stroke="#0284c7" stroke-width="2"/>
+    <text x="269" y="206" class="font-cell-score" fill="#38bdf8" text-anchor="middle">8</text>
+    <!-- Residual Tag -->
+    <g transform="translate(276, 208)" filter="url(#glowBadge)">
+      <rect width="36" height="18" rx="5" fill="#0284c7"/>
+      <text x="18" y="13" fill="#ffffff" font-family="sans-serif" font-size="9" font-weight="900" text-anchor="middle">RES</text>
+    </g>
+
+    <rect x="312" y="174" width="70" height="50" rx="8" fill="url(#cellHigh)" stroke="#b45309"/>
+    <text x="347" y="206" class="font-cell-score" fill="#f59e0b" text-anchor="middle">10</text>
+
+    <!-- Row 1 (Likelihood = 1) -->
+    <rect x="0" y="232" width="70" height="50" rx="8" fill="url(#cellLow)" stroke="#059669"/>
+    <text x="35" y="264" class="font-cell-score" fill="#34d399" text-anchor="middle">1</text>
+
+    <rect x="78" y="232" width="70" height="50" rx="8" fill="url(#cellLow)" stroke="#059669"/>
+    <text x="113" y="264" class="font-cell-score" fill="#34d399" text-anchor="middle">2</text>
+
+    <rect x="156" y="232" width="70" height="50" rx="8" fill="url(#cellLow)" stroke="#059669"/>
+    <text x="191" y="264" class="font-cell-score" fill="#34d399" text-anchor="middle">3</text>
+
+    <rect x="234" y="232" width="70" height="50" rx="8" fill="url(#cellLow)" stroke="#059669"/>
+    <text x="269" y="264" class="font-cell-score" fill="#34d399" text-anchor="middle">4</text>
+
+    <rect x="312" y="232" width="70" height="50" rx="8" fill="url(#cellMed)" stroke="#0e7490"/>
+    <text x="347" y="264" class="font-cell-score" fill="#38bdf8" text-anchor="middle">5</text>
+  </g>
+
+  <!-- Bottom X-Axis (Impact) -->
+  <g transform="translate(115, 380)">
+    <text x="35" y="0" class="font-cell-score" fill="#94a3b8" text-anchor="middle">1</text>
+    <text x="113" y="0" class="font-cell-score" fill="#94a3b8" text-anchor="middle">2</text>
+    <text x="191" y="0" class="font-cell-score" fill="#94a3b8" text-anchor="middle">3</text>
+    <text x="269" y="0" class="font-cell-score" fill="#94a3b8" text-anchor="middle">4</text>
+    <text x="347" y="0" class="font-cell-score" fill="#94a3b8" text-anchor="middle">5</text>
+    
+    <text x="191" y="26" class="font-label" text-anchor="middle" letter-spacing="2">
+      BUSINESS IMPACT LEVEL (1: LOW TO 5: MISSION-CRITICAL)
+    </text>
+  </g>
+
+  <!-- Right Side Breakdown & Math Card -->
+  <g transform="translate(530, 85)">
+    <rect width="380" height="315" rx="14" fill="#0b1329" stroke="#1e293b" stroke-width="1.2"/>
+    <rect x="0" y="0" width="380" height="4" rx="2" fill="#38bdf8"/>
+
+    <text x="24" y="32" class="font-matrix-title" font-size="14">EXPLAINABLE DELTA MECHANICS</text>
+
+    <!-- Inherent Box -->
+    <rect x="24" y="50" width="332" height="60" rx="10" fill="#1e293b" fill-opacity="0.6" stroke="#e11d48" stroke-width="0.8"/>
+    <text x="38" y="72" fill="#fda4af" font-family="sans-serif" font-size="11" font-weight="700">INHERENT RISK [RAW EXPOSURE]</text>
+    <text x="38" y="96" fill="#ffffff" font-family="monospace" font-size="14" font-weight="700">5 (Likelihood) × 4 (Impact) = <tspan fill="#fb7185">20 / 25</tspan> [CRITICAL]</text>
+
+    <!-- Control Effectiveness Box -->
+    <rect x="24" y="122" width="332" height="60" rx="10" fill="#1e293b" fill-opacity="0.6" stroke="#10b981" stroke-width="0.8"/>
+    <text x="38" y="144" fill="#6ee7b7" font-family="sans-serif" font-size="11" font-weight="700">VALIDATED CONTROL EFFECTIVENESS</text>
+    <text x="38" y="168" fill="#ffffff" font-family="monospace" font-size="14" font-weight="700">Audited Evidence Controls = <tspan fill="#34d399">60% MITIGATION</tspan></text>
+
+    <!-- Residual Box -->
+    <rect x="24" y="194" width="332" height="60" rx="10" fill="#1e293b" fill-opacity="0.6" stroke="#0284c7" stroke-width="0.8"/>
+    <text x="38" y="216" fill="#7dd3fc" font-family="sans-serif" font-size="11" font-weight="700">RESIDUAL RISK [POST-MITIGATION]</text>
+    <text x="38" y="240" fill="#ffffff" font-family="monospace" font-size="14" font-weight="700">20 × (1.0 - 0.60) = <tspan fill="#38bdf8">8 / 25</tspan> [MEDIUM]</text>
+
+    <!-- Delta Summary -->
+    <rect x="24" y="266" width="332" height="34" rx="8" fill="#042f2e" stroke="#059669" stroke-width="0.8"/>
+    <text x="38" y="287" fill="#6ee7b7" font-family="sans-serif" font-size="11" font-weight="700">
+      POSTURE DELTA: -12 RISK POINTS (-60% TOTAL EXPOSURE)
+    </text>
+  </g>
+</svg>
